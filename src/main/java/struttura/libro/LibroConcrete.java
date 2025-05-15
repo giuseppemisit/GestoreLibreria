@@ -1,16 +1,16 @@
 package struttura.libro;
 
-import struttura.dettagli.Autore;
+import struttura.autore.AutoreConcrete;
 import struttura.dettagli.Informazioni;
 
 public final class LibroConcrete implements Libro {
 
     private final int ISBN;
     private final String TITOLO;
-    private final Autore AUTORE;
+    private final AutoreConcrete AUTORE;
     private final Informazioni.GenereLibro GENERE;
 
-    public LibroConcrete(int ISBN, String TITOLO, Autore AUTORE, Informazioni.GenereLibro GENERE) {
+    public LibroConcrete(int ISBN, String TITOLO, AutoreConcrete AUTORE, Informazioni.GenereLibro GENERE) {
         if((ISBN != 13) || (ISBN != 10))
             throw new IllegalArgumentException("ISBN non valido");
         this.ISBN = ISBN;
@@ -25,7 +25,7 @@ public final class LibroConcrete implements Libro {
     public String getTitolo() {
         return TITOLO;
     }
-    public Autore getAutore() {
+    public AutoreConcrete getAutore() {
         return AUTORE;
     }
     public Informazioni.GenereLibro getGenere() {
