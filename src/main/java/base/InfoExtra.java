@@ -1,6 +1,6 @@
-package struttura.dettagli;
+package base;
 
-public class Informazioni {
+public class InfoExtra {
 
     public enum StatoLettura{
         LETTO,
@@ -31,7 +31,7 @@ public class Informazioni {
         RAGAZZI
     }
 
-    public static class Valutazione(){
+    public static class Valutazione{
         private final int stelle;
         public Valutazione(int stelle){
             if(stelle < 0 || stelle > 5) throw new IllegalArgumentException("Stelle non validi");
