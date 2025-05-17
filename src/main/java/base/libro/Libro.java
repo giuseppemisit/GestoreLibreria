@@ -5,7 +5,7 @@ import base.InfoExtra;
 
 import java.util.Collection;
 
-public interface Libro {
+public interface Libro extends Cloneable {
 
     /** @return l'ISBN a 13 cifre del libro */
     String getIsbn();
@@ -58,5 +58,11 @@ public interface Libro {
      * @return true se il genere è stato rimosso dal libro, false altrimenti
      */
     boolean rimuoviGenere(InfoExtra.GenereLibro genere);
+
+    /**
+     * Crea un nuovo oggetto Libro identico a questo oggetto
+     * @return un nuovo oggetto Libro
+     */
+    Libro clone();
 
 }
