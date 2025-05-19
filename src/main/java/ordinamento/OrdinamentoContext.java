@@ -1,10 +1,10 @@
-package ordine;
+package ordinamento;
 
 import base.libro.Libro;
 
 import java.util.List;
 
-public class GestioneOrdinamento {
+public class OrdinamentoContext {
 
     private Ordinamento ordinamento;
 
@@ -13,6 +13,8 @@ public class GestioneOrdinamento {
     }
 
     public void esegui(List<Libro> libri){
+        if(ordinamento == null) return;
         ordinamento.ordina(libri);
     }
+
 }

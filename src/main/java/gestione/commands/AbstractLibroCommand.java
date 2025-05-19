@@ -2,7 +2,7 @@ package gestione.commands;
 
 import base.libro.Libro;
 import gestione.Command;
-import salvataggio.RepositoryLibri;
+import repository.RepositoryLibri;
 
 public abstract class AbstractLibroCommand implements Command {
 

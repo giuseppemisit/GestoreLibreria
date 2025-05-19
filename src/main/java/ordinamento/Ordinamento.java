@@ -1,11 +1,10 @@
-package ordine;
+package ordinamento;
 
 import base.libro.Libro;
 
-import java.util.Comparator;
 import java.util.List;
 
-public interface Ordinamento extends Comparator<Libro> {
+public interface Ordinamento{
 
     /**
      * Ordina la lista di libri passata come parametro.

@@ -1,4 +1,4 @@
-package ordine.criteri;
+package ordinamento.criteri;
 
 import base.Autore;
 import base.libro.Libro;

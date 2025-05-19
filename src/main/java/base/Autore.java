@@ -7,8 +7,9 @@ public class Autore {
 
     public Autore(String nome, String cognome) {
         if(nome == null || nome.isBlank())
-            throw new IllegalArgumentException("Inserire almeno un nome");
-        //Il cognome lo considero facoltativo
+            throw new IllegalArgumentException("Inserire un nome");
+        if(cognome == null || cognome.isBlank())
+            throw new IllegalArgumentException("Inserire un cognome");
         this.nome = nome;
         this.cognome = cognome;
     }

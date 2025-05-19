@@ -1,11 +1,12 @@
-package ordine.criteri;
+package ordinamento.criteri;
 
 import base.libro.Libro;
-import ordine.Ordinamento;
+import ordinamento.Ordinamento;
 
+import java.util.Comparator;
 import java.util.List;
 
-public abstract class AbstractOrdina implements Ordinamento {
+public abstract class AbstractOrdina implements Ordinamento, Comparator<Libro> {
 
     public AbstractOrdina(){}
 
