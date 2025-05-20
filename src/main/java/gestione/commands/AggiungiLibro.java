@@ -1,18 +1,18 @@
 package gestione.commands;
 
 import base.libro.Libro;
-import repository.RepositoryLibri;
+import base.libreria.Libreria;
 
-public class AggiungiLibro extends AbstractLibroCommand{
+public class AggiungiLibro extends AbstractModifiche {
 
-    public AggiungiLibro(RepositoryLibri repository, Libro libro) {
-        super(repository, libro);
+    public AggiungiLibro(Libreria libreria, Libro libro) {
+        super(libreria, libro);
     }
 
     @Override
     public void execute() {
         checkNotExecuted();
-        boolean successo = repository.aggiungi(libro);
+        boolean successo = libreria.aggiungiLibro(libro);
         verificaSuccesso(successo, "Aggiunta non riuscita");
         operazioneEffettuata = true;
     }
@@ -20,7 +20,7 @@ public class AggiungiLibro extends AbstractLibroCommand{
     @Override
     public void undo() {
         checkExecuted();
-        boolean successo = repository.rimuovi(libro);
+        boolean successo = libreria.rimuoviLibro(libro);
         verificaSuccesso(successo, "Annullamento non riuscito");
         operazioneEffettuata = false;
     }

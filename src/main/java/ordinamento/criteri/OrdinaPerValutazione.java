@@ -1,6 +1,6 @@
 package ordinamento.criteri;
 
-import base.InfoExtra;
+import base.utility.InfoExtra;
 import base.libro.Libro;
 
 public class OrdinaPerValutazione extends AbstractOrdina {

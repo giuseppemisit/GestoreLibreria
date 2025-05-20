@@ -1,6 +1,6 @@
 package interrogazione;
 
-import base.InfoExtra;
+import base.utility.InfoExtra;
 
 import java.util.Set;
 

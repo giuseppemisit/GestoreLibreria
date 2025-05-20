@@ -1,4 +1,4 @@
-package base;
+package base.utility;
 
 public class InfoExtra {
 

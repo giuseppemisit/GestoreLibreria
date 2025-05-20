@@ -1,21 +1,23 @@
 package gestione.commands;
 
 import base.libro.Libro;
-import repository.RepositoryLibri;
+import base.libreria.Libreria;
 
-public class ModificaLibro extends AbstractLibroCommand {
+public class ModificaLibro extends AbstractModifiche {
 
+    private Libro libroModificato;
     private Libro libroOriginale;
 
-    public ModificaLibro(RepositoryLibri repository, Libro libro) {
-        super(repository, libro);
+    public ModificaLibro(Libreria libreria, Libro libro, Libro libroModificato) {
+        super(libreria, libro);
+        this.libroModificato = libroModificato;
     }
 
     @Override
     public void execute() {
         checkNotExecuted();
         libroOriginale = libro.clone();
-        boolean successo = repository.aggiorna(libro);
+        boolean successo = libreria.modificaLibro(libro, libroModificato);
         verificaSuccesso(successo, "Modifica non riuscita");
         operazioneEffettuata = true;
     }
@@ -23,7 +25,7 @@ public class ModificaLibro extends AbstractLibroCommand {
     @Override
     public void undo() {
         checkExecuted();
-        boolean successo = repository.aggiorna(libroOriginale);
+        boolean successo = libreria.modificaLibro(libroModificato, libroOriginale);
         verificaSuccesso(successo, "Annullamento non riuscito");
         operazioneEffettuata = false;
     }

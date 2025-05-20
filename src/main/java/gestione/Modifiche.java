@@ -1,6 +1,6 @@
 package gestione;
 
-public interface Command {
+public interface Modifiche {
 
     /**
      * Esegue il comando incapsulato dalla classe implementante.

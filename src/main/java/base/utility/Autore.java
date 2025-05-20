@@ -1,4 +1,4 @@
-package base;
+package base.utility;
 
 public class Autore {
 
@@ -40,9 +40,9 @@ public class Autore {
     public boolean equals(Object obj) {
         if(obj == null) return false;
         if(obj == this) return true;
-        if(!(obj instanceof base.Autore)) return false;
+        if(!(obj instanceof Autore)) return false;
 
-        base.Autore a = (base.Autore) obj;
+        Autore a = (Autore) obj;
         if(!(this.nome.equals(a.nome))) return false;
         if(!(this.cognome.equals(a.cognome))) return false;
         return true;

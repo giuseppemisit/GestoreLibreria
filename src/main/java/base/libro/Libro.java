@@ -1,7 +1,7 @@
 package base.libro;
 
-import base.Autore;
-import base.InfoExtra;
+import base.utility.Autore;
+import base.utility.InfoExtra;
 
 import java.util.Collection;
 

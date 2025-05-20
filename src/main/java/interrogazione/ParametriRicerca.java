@@ -1,6 +1,6 @@
 package interrogazione;
 
-import base.Autore;
+import base.utility.Autore;
 
 import java.util.Set;
 

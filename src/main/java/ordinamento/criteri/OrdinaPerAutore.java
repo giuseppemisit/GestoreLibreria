@@ -1,6 +1,6 @@
 package ordinamento.criteri;
 
-import base.Autore;
+import base.utility.Autore;
 import base.libro.Libro;
 
 import java.util.Collection;

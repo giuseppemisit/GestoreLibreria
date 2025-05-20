@@ -1,20 +1,20 @@
 package gestione.commands;
 
 import base.libro.Libro;
-import gestione.Command;
-import repository.RepositoryLibri;
+import gestione.Modifiche;
+import base.libreria.Libreria;
 
-public abstract class AbstractLibroCommand implements Command {
+public abstract class AbstractModifiche implements Modifiche {
 
-    protected final RepositoryLibri repository;
+    protected final Libreria libreria;
     protected final Libro libro;
     protected boolean operazioneEffettuata;
 
-    protected AbstractLibroCommand(RepositoryLibri repository, Libro libro) {
-        if (repository == null || libro == null) {
-            throw new IllegalArgumentException("Repository e libro non possono essere null");
+    protected AbstractModifiche(Libreria libreria, Libro libro) {
+        if (libreria == null || libro == null) {
+            throw new IllegalArgumentException("Libreria e libro non possono essere null");
         }
-        this.repository = repository;
+        this.libreria = libreria;
         this.libro = libro;
         this.operazioneEffettuata = false;
     }
