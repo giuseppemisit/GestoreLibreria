@@ -1,10 +1,10 @@
 package gestione;
 
-public class GestoreModifiche {
+public class GestoreAggiorna {
 
-    private Modifiche comandoCorrente;
+    private CommandAggiorna comandoCorrente;
 
-    public void eseguiComando(Modifiche comando){
+    public void eseguiComando(CommandAggiorna comando){
         if(comando == null)
             throw new IllegalArgumentException("Comando non valido");
         comando.execute();

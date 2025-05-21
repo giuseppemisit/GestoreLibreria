@@ -1,4 +1,4 @@
-package ordinamento;
+package esplora.ordina;
 
 import base.libro.Libro;
 

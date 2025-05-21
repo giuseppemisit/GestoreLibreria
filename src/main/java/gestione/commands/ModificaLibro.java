@@ -3,7 +3,7 @@ package gestione.commands;
 import base.libro.Libro;
 import base.libreria.Libreria;
 
-public class ModificaLibro extends AbstractModifiche {
+public class ModificaLibro extends AbstractCommandAggiorna {
 
     private Libro libroModificato;
     private Libro libroOriginale;

@@ -1,7 +1,7 @@
-package ordinamento.criteri;
+package esplora.ordina.criteri;
 
 import base.libro.Libro;
-import ordinamento.Ordinamento;
+import esplora.ordina.Ordinamento;
 
 import java.util.Comparator;
 import java.util.List;

@@ -1,16 +1,16 @@
 package gestione.commands;
 
 import base.libro.Libro;
-import gestione.Modifiche;
+import gestione.CommandAggiorna;
 import base.libreria.Libreria;
 
-public abstract class AbstractModifiche implements Modifiche {
+public abstract class AbstractCommandAggiorna implements CommandAggiorna {
 
     protected final Libreria libreria;
     protected final Libro libro;
     protected boolean operazioneEffettuata;
 
-    protected AbstractModifiche(Libreria libreria, Libro libro) {
+    protected AbstractCommandAggiorna(Libreria libreria, Libro libro) {
         if (libreria == null || libro == null) {
             throw new IllegalArgumentException("Libreria e libro non possono essere null");
         }

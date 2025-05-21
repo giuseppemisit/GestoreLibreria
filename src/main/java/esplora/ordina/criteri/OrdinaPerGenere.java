@@ -1,4 +1,4 @@
-package ordinamento.criteri;
+package esplora.ordina.criteri;
 
 import base.utility.InfoExtra;
 import base.libro.Libro;

@@ -1,6 +1,6 @@
 package gestione;
 
-public interface Modifiche {
+public interface CommandAggiorna {
 
     /**
      * Esegue il comando incapsulato dalla classe implementante.
