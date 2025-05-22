@@ -3,32 +3,23 @@ package esplora.interroga;
 import base.libro.Libro;
 import base.utility.Autore;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class ParametriRicerca implements Parametri {
 
     private final String isbn;
     private final String titolo;
-    private final Set<Autore> autori;
+    private final Autore autore;
 
-    public ParametriRicerca(String isbn, String titolo){
+    public ParametriRicerca(String isbn, String titolo, Autore autore){
         this.isbn = isbn;
         this.titolo = titolo;
-        this.autori = new HashSet<>();
-    }
-
-    public boolean aggiungiAutore(Autore autore){
-        if(autore == null)
-            return false;
-        return this.autori.add(autore);
+        this.autore = autore;
     }
 
     @Override
     public boolean isEmpty(){
         return this.isbn == null &&
                 this.titolo == null &&
-                this.autori.isEmpty();
+                this.autore == null;
     }
 
     @Override
@@ -38,8 +29,8 @@ public class ParametriRicerca implements Parametri {
 
         boolean soddisfaTitolo = this.titolo == null || this.titolo.equals(libro.getTitolo());
 
-        boolean soffisfaAutori = this.autori.isEmpty() ||
-                libro.getAutori().stream().anyMatch(this.autori::contains);
+        boolean soffisfaAutori = this.autore == null ||
+                libro.getAutori().contains(autore);
 
         return soddisfaIsbn && soddisfaTitolo && soffisfaAutori;
     }
