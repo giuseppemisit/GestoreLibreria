@@ -1,4 +1,4 @@
-package app;
+package controllo;
 
 import base.libreria.Libreria;
 import base.libro.Libro;
@@ -24,16 +24,6 @@ public class ConcreteLibreriaHub implements LibreriaHub {
     public ConcreteLibreriaHub(Libreria libreria) {
         this.libreria = libreria;
         this.gestoreAggiorna = new GestoreAggiorna();
-    }
-
-    @Override
-    public List<String> utentiRegistrati() {
-        return libreria.utentiRegistrati().stream().toList();
-    }
-
-    @Override
-    public boolean registraUtente(String username) {
-        return libreria.creaNuovoUtente(username);
     }
 
     @Override

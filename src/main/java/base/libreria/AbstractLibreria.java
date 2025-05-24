@@ -11,8 +11,6 @@ public abstract class AbstractLibreria implements Libreria {
 
     private final StorageService storageService;
 
-    private final Set<String> utentiRegistrati;
-
     private final String utenteCorrente;
     private final Set<Libro> libriUtente;
 
@@ -21,16 +19,10 @@ public abstract class AbstractLibreria implements Libreria {
         Objects.requireNonNull(storageService, "StorageService non può essere null");
         Objects.requireNonNull(utenteCorrente, "L'utente corrente non può essere null");
 
-        this.storageService = storageService;
-        utentiRegistrati = storageService.caricaUtenti();
-
-        if(!utentiRegistrati.contains(utenteCorrente))
-            throw new IllegalArgumentException("Utente non registrato");
-
         this.utenteCorrente = utenteCorrente;
+        this.storageService = storageService;
         libriUtente = storageService.caricaLibreria();
     }
-
 
     @Override
     public String utenteCorrente() {
@@ -38,36 +30,8 @@ public abstract class AbstractLibreria implements Libreria {
     }
 
     @Override
-    public synchronized Set<String> utentiRegistrati() {
-        return new HashSet<>(utentiRegistrati);
-    }
-
-    @Override
-    public synchronized boolean esisteUtente(String username){
-        return utentiRegistrati.contains(username);
-    }
-
-    @Override
     public synchronized Set<Libro> getLibriUtente() {
         return new HashSet<>(libriUtente);
-    }
-
-    @Override
-    public synchronized boolean creaNuovoUtente(String username) {
-        if(utentiRegistrati.contains(username))
-            return false;
-        utentiRegistrati.add(username);
-        storageService.salvaUtenti(utentiRegistrati);
-        return true;
-    }
-
-    @Override
-    public synchronized boolean eliminaUtente(String username) {
-        if(!utentiRegistrati.contains(username))
-            return false;
-        utentiRegistrati.remove(username);
-        storageService.salvaUtenti(utentiRegistrati);
-        return true;
     }
 
     @Override
@@ -102,7 +66,6 @@ public abstract class AbstractLibreria implements Libreria {
     public String toString() {
         return "Libreria{" +
                 "storageService=" + storageService +
-                ", utentiRegistrati=" + utentiRegistrati +
                 ", utenteCorrente='" + utenteCorrente + '\'' +
                 ", libriUtente=" + libriUtente +
                 '}';
@@ -116,7 +79,6 @@ public abstract class AbstractLibreria implements Libreria {
 
         AbstractLibreria l = (AbstractLibreria) obj;
         return l.storageService.equals(this.storageService) &&
-                l.utentiRegistrati.equals(this.utentiRegistrati) &&
                 l.utenteCorrente.equals(this.utenteCorrente) &&
                 l.libriUtente.equals(this.libriUtente);
     }
@@ -126,7 +88,6 @@ public abstract class AbstractLibreria implements Libreria {
         final int prime = 31;
         int result = 1;
         result = prime * result + storageService.hashCode();
-        result = prime * result + utentiRegistrati.hashCode();
         result = prime * result + utenteCorrente.hashCode();
         result = prime * result + libriUtente.hashCode();
         return result;

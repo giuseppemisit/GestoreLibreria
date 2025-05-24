@@ -67,6 +67,8 @@ public abstract class AbstractLibro implements Libro {
         this.titolo = titolo;
     }
 
+    public abstract Libro clone();
+
     public void setValutazione(InfoExtra.Valutazione valutazione) {
         this.valutazione = valutazione;
     }
