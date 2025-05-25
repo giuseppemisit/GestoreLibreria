@@ -1,19 +1,14 @@
 package app;
 
-import base.libro.Libro;
-import base.utility.Autore;
-import base.utility.InfoExtra;
-import esplora.interroga.ParametriFiltro;
-import esplora.interroga.ParametriRicerca;
-import esplora.ordina.utility.TipoOrdinamento;
-
-import java.util.List;
+import java.util.Set;
 
 public interface UserInterface {
 
-    String homeGestioneUtenti(List<String> utenti);
+    String homeGestioneUtenti();
 
-    String selezionaUtenteEsistente(List<String> utenti);
+    String selezionaUtenteEsistente(Set<String> utenti);
+
+    String creaNuovoUtente();
 
 
 

@@ -1,5 +1,6 @@
-package controllo.utenti;
+package base.utenti;
 
+import base.libro.Libro;
 import salvataggio.JsonStorageService;
 import salvataggio.StorageService;
 
@@ -12,7 +13,7 @@ public class ConcreteUserManager implements UserManager {
     private final Set<String> utentiRegistrati;
 
     public ConcreteUserManager(){
-        this.storageService = new JsonStorageService();
+        this.storageService = new JsonStorageService(null);
         this.utentiRegistrati = storageService.caricaUtenti();
     }
 
@@ -30,6 +31,9 @@ public class ConcreteUserManager implements UserManager {
     public synchronized boolean creaNuovoUtente(String username) {
         if(utentiRegistrati.contains(username))
             return false;
+        Set<Libro> fileVuoto = new HashSet<>();
+        StorageService fileSalvataggio = new JsonStorageService(username);
+        fileSalvataggio.salvaLibreria(fileVuoto);
         utentiRegistrati.add(username);
         storageService.salvaUtenti(utentiRegistrati);
         return true;
@@ -39,6 +43,8 @@ public class ConcreteUserManager implements UserManager {
     public synchronized boolean eliminaUtente(String username) {
         if(!utentiRegistrati.contains(username))
             return false;
+        StorageService fileSalvataggio = new JsonStorageService(username);
+        fileSalvataggio.eliminaLibreria();
         utentiRegistrati.remove(username);
         storageService.salvaUtenti(utentiRegistrati);
         return true;

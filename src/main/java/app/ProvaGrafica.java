@@ -13,8 +13,6 @@ import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -67,207 +65,12 @@ public class ProvaGrafica extends JFrame {
         utenti.add("Giuseppe");
         utenti.add("Uberto");
         utenti.add("JK");
-        System.out.println(homeGestioneUtenti(utenti));
     }
-
-
-
-
-    public String homeGestioneUtenti(List<String> utenti) {
-
-        final JDialog dialog = new JDialog((Frame) null, "Catalogo Libri", true);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-
-        // Pannello principale con layout a bordi
-        JPanel mainPanel = new JPanel(new BorderLayout());
-
-        // Aggiunta titolo
-        mainPanel.add(creaTitoloConIcona("👤", "Area Utenti"), BorderLayout.NORTH);
-
-        // Pannello con i pulsanti verticali
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 10, 10));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50)); // Margini
-
-        String[] testiPulsanti = {"Accedi", "Nuovo Utente", "Elimina Utente"};
-
-        JButton accediButton = new JButton(testiPulsanti[0]);
-        JButton nuovoUtenteButton = new JButton(testiPulsanti[1]);
-        JButton eliminaUtenteButton = new JButton(testiPulsanti[2]);
-        eliminaUtenteButton.setForeground(Color.RED); // Testo rosso per enfatizzare
-
-        buttonPanel.add(accediButton);
-        buttonPanel.add(nuovoUtenteButton);
-        buttonPanel.add(eliminaUtenteButton);
-
-        // Inserimento del pannello pulsanti al centro
-        mainPanel.add(buttonPanel, BorderLayout.CENTER);
-
-        // Variabile per salvare la scelta dell'utente
-        AtomicReference<String> utenteSelezionato = new AtomicReference<>(null);
-
-        // Action: Accedi
-        accediButton.addActionListener(e -> {
-            try {
-                String utente = selezionaUtenteEsistente(utenti);
-                if (utente != null) {
-                    utenteSelezionato.set(utente);
-                    dialog.dispose(); // Chiudi finestra
-                }
-            } catch (Exception ex) {
-                mostraErrore(ex.getMessage());
-            }
-        });
-
-        // Action: Crea Nuovo Utente
-        nuovoUtenteButton.addActionListener(e -> {
-            try {
-                String nuovo = creaNuovoUtente();
-                if (nuovo != null) {
-                    utenteSelezionato.set(nuovo);
-                    dialog.dispose();
-                }
-            } catch (Exception ex) {
-                mostraErrore(ex.getMessage());
-            }
-        });
-
-        // Action: Elimina Utente
-        eliminaUtenteButton.addActionListener(e -> {
-            try {
-                boolean eliminato = eliminaUtente();
-                if (eliminato) {
-                    utenti.remove(utenteSelezionato.get());
-                    dialog.dispose();
-                }
-                else {
-                    mostraErrore("L'utente non esiste");
-                }
-            }catch (Exception ex){
-                mostraErrore(ex.getMessage());
-            }
-        });
-
-        // Configurazione e visualizzazione della finestra
-        dialog.setContentPane(mainPanel);
-        dialog.setSize(350, 400);
-        dialog.setResizable(false);
-        dialog.setLocationRelativeTo(null); // Centra sullo schermo
-
-        // Se viene chiusa la finestra termina il programma
-        dialog.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-
-        // Bloccante finché non si chiude
-        dialog.setVisible(true);
-
-        // Ritorna l'utente selezionato o creato, oppure null
-        return utenteSelezionato.get();
-    }
-
-    private JLabel creaTitoloConIcona(String emoji, String testo) {
-        JLabel titleLabel = new JLabel(testo, JLabel.CENTER);
-        titleLabel.setFont(new Font("Dialog", Font.BOLD, 18));
-        titleLabel.setIcon(emojiToIcon(emoji));
-        return titleLabel;
-    }
-
-    private void mostraErrore(String messaggio) {
-        JOptionPane.showMessageDialog(this, messaggio, "Errore", JOptionPane.ERROR_MESSAGE);
-    }
-
-
-
-    public String selezionaUtenteEsistente(List<String> utenti) {
-        if (utenti == null || utenti.isEmpty()) {
-            throw new IllegalArgumentException("Nessun utente registrato");
-        }
-        // Filtriamo eventuali elementi nulli dalla lista
-        List<String> utentiValidi = utenti.stream()
-                .filter(u -> u != null)
-                .toList();
-
-        if (utentiValidi.isEmpty())
-            throw new IllegalArgumentException("La lista contiene solo elementi nulli");
-
-        String[] opzioni = utentiValidi.toArray(new String[0]);
-        String utenteSelezionato = (String) JOptionPane.showInputDialog(
-                this,
-                "Seleziona un utente:", // Messaggio da mostrare
-                "Selezione Utente", // Titolo della finestra
-                JOptionPane.QUESTION_MESSAGE, // Tipo di icona
-                null, // Icona personalizzata (null->default)
-                opzioni, // Array delle opzioni selezionabili
-                opzioni[0]  // Valore predefinito (primo elemento)
-        );
-        if (utenteSelezionato == null)
-            throw new RuntimeException("Selezione annullata");
-        return utenteSelezionato;
-    }
-
-    public String creaNuovoUtente() {
-        String nomeUtente = JOptionPane.showInputDialog(
-                this,
-                "Inserisci il nuovo Username:",
-                "Creazione Nuovo Utente",
-                JOptionPane.QUESTION_MESSAGE
-        );
-        if (nomeUtente == null || nomeUtente.trim().isEmpty())
-            throw new RuntimeException("Operazione annullata");
-        return nomeUtente.trim();
-    }
-
-    public boolean eliminaUtente(){
-
-    }
-
-
-
-    //*****************************
-
-
-    private ImageIcon emojiToIcon(String emoji) {
-        int dimensione = 40;
-        // Creazione di un'etichetta con l'emoji
-        JLabel emojiLabel = new JLabel(emoji);
-        emojiLabel.setFont(new Font("Dialog", Font.PLAIN, dimensione));
-        emojiLabel.setSize(emojiLabel.getPreferredSize());
-
-        // Creazione di un'immagine della dimensione dell'etichetta
-        BufferedImage image = new BufferedImage(
-                emojiLabel.getWidth(),
-                emojiLabel.getHeight(),
-                BufferedImage.TYPE_INT_ARGB
-        );
-
-        // Rendering dell'etichetta nell'immagine
-        Graphics g = image.getGraphics();
-        emojiLabel.paint(g);
-        g.dispose();
-
-        // Creazione dell'icona dall'immagine
-        return new ImageIcon(image);
-    }
-
-
-
 
 
     public void paginaPrincipale() {
 
     }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -533,17 +336,6 @@ public class ProvaGrafica extends JFrame {
     }
 
 
-    public Autore creaNuovoAutore() {
-        /**
-         * 1. Nome : String
-         * 2. Cognome: String
-         * Pulsanti:
-         * Ok -> restiruisce l'autore
-         * Annulla/chiudi pannello -> restituisce null
-         */
-        return null;
-    }
-
 
     public TipoOrdinamento selezionaOrdinamento() {
         return null;
@@ -644,32 +436,6 @@ public class ProvaGrafica extends JFrame {
         panel.add(isbnField);
 
         return panel;
-    }
-
-    private List<Autore> nuovaListaAutori(){
-        /**
-         * 1. JTextFild degli autori aggiungi nella List
-         * pulsanti:
-         * Salva -> resituisce la List<Autore>
-         * Nuovo autore -> apre creaNuovoAutore()
-         * Annulla/chiudi pannel -> resituisce null
-         */
-        return null;
-    }
-
-    private List<InfoExtra.GenereLibro> nuovaListaGeneri(){
-        /**
-         * 1. JTextFild dei generi nella List
-         * menù a tendina:
-         * valore di default: -> nessuno
-         * altri valori: -> InfoExtra.GenereLibro
-         *
-         * pulsati:
-         * Aggiungi Selezionato -> aggiunge il genere selezionato alla List
-         * Salva -> Restituisce la List
-         * Annula/chiudi finestra -> restituisce null
-         */
-        return null;
     }
 
 
