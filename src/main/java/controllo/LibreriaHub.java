@@ -7,6 +7,7 @@ import esplora.ordina.utility.TipoOrdinamento;
 import java.util.List;
 
 public interface LibreriaHub {
+    String utenteCorrente();
     void aggiungiLibro(Libro libro);
     void rimuoviLibro(Libro libro);
     void modificaLibro(Libro originale, Libro modificato);

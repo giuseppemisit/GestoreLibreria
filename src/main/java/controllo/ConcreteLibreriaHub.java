@@ -27,6 +27,11 @@ public class ConcreteLibreriaHub implements LibreriaHub {
     }
 
     @Override
+    public String utenteCorrente() {
+        return libreria.utenteCorrente();
+    }
+
+    @Override
     public void aggiungiLibro(Libro libro) {
         CommandAggiorna cmdAggiungi = new AggiungiLibro(libreria, libro);
         gestoreAggiorna.eseguiComando(cmdAggiungi);

@@ -1,4 +1,4 @@
-package base.utenti;
+package app.utenti;
 
 import base.libro.Libro;
 import salvataggio.JsonStorageService;
