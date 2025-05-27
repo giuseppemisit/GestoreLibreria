@@ -1,6 +1,6 @@
 package app.utenti;
 
-import java.util.Set;
+import java.util.List;
 
 public interface UserManager {
 
@@ -8,7 +8,7 @@ public interface UserManager {
      * Utenti che sono registrati nel sistema.
      * @return username degli utenti presenti nel sistema
      */
-    Set<String> utentiRegistrati();
+    List<String> utentiRegistrati();
 
     /**
      * Dice se l'username è presente.

@@ -29,10 +29,10 @@ public class ParametriRicerca implements Parametri {
 
         boolean soddisfaTitolo = this.titolo == null || this.titolo.equals(libro.getTitolo());
 
-        boolean soffisfaAutori = this.autore == null ||
+        boolean soddisfaAutori = this.autore == null ||
                 libro.getAutori().contains(autore);
 
-        return soddisfaIsbn && soddisfaTitolo && soffisfaAutori;
+        return soddisfaIsbn && soddisfaTitolo && soddisfaAutori;
     }
 
 }

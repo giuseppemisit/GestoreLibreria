@@ -2,35 +2,35 @@ package salvataggio;
 
 import base.libro.Libro;
 
-import java.util.Set;
+import java.util.Collection;
 
 public interface StorageService {
 
     /**
-     * Carica l'elenco degli utenti registrati dal supporto di archiviazione.
-     * @return un set contenente gli username degli utenti registrati
+     * Carica l'elenco degli utenti registrati.
+     * @return Collection contenente gli username degli utenti registrati
      */
-    Set<String> caricaUtenti();
+    Collection<String> caricaUtenti();
 
     /**
      * Carica la libreria dal supporto di archiviazione.
      * @return La libreria salvata
      */
-    Set<Libro> caricaLibreria();
+    Collection<Libro> caricaLibreria();
 
     /**
      * Salva l'elenco degli utenti registrati.
-     * @param utenti un set contenente gli username degli utenti da salvare
+     * @param utenti una Collection contenente gli username degli utenti da salvare.
      * @return true se il salvataggio è avvenuto con successo, false altrimenti
      */
-    boolean salvaUtenti(Set<String> utenti);
+    boolean salvaUtenti(Collection<String> utenti);
 
     /**
      * Salva la libreria specificata nel supporto di archiviazione.
-     * @param libreria la libreria da salvare
+     * @param libreria Collection dei libri da salvare
      * @return true se il salvataggio è avvenuto con successo, false altrimenti
      */
-    boolean salvaLibreria(Set<Libro> libreria);
+    boolean salvaLibreria(Collection<Libro> libreria);
 
 
     /**

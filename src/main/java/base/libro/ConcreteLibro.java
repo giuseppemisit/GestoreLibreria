@@ -3,7 +3,7 @@ package base.libro;
 import base.utility.Autore;
 import base.utility.InfoExtra;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class ConcreteLibro extends AbstractLibro {
@@ -25,8 +25,8 @@ public class ConcreteLibro extends AbstractLibro {
                 this.getTitolo(),
                 this.getValutazione(),
                 this.getStatoLettura(),
-                new HashSet<>(this.getAutori()),
-                new HashSet<>(this.getGeneri())
+                new LinkedHashSet<>(this.getAutori()),
+                new LinkedHashSet<>(this.getGeneri())
         );
     }
 

@@ -19,6 +19,9 @@ public class OrdinamentoContext {
             case TITOLO:
                 this.ordinamento = OrdinamentoFactory.creaOrdinamentoPerTitolo();
                 break;
+            case AUTORE:
+                this.ordinamento = OrdinamentoFactory.creaOrdinamentoPerAutore();
+                break;
             case GENERE:
                 this.ordinamento = OrdinamentoFactory.creaOrdinamentoPerGenere();
                 break;

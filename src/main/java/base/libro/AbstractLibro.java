@@ -3,10 +3,7 @@ package base.libro;
 import base.utility.Autore;
 import base.utility.InfoExtra;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public abstract class AbstractLibro implements Libro {
 
@@ -15,13 +12,15 @@ public abstract class AbstractLibro implements Libro {
     private InfoExtra.Valutazione valutazione;
     private InfoExtra.StatoLettura statoLettura;
 
-    private final Set<Autore> autori = new HashSet<>();
-    private final Set<InfoExtra.GenereLibro> genere = new HashSet<>();
+    private final Set<Autore> autori;
+    private final Set<InfoExtra.GenereLibro> generi;
 
-    public AbstractLibro(String isbn, String titolo, InfoExtra.Valutazione valutazione,
+    public AbstractLibro(String isbn,
+                         String titolo,
+                         InfoExtra.Valutazione valutazione,
                          InfoExtra.StatoLettura statoLettura,
                          Set<Autore> autori,
-                         Set<InfoExtra.GenereLibro> genere) {
+                         Set<InfoExtra.GenereLibro> generi) {
         // Verifiche
         if(!isbn.matches("\\d{13}"))
             throw new IllegalArgumentException("ISBN non valido");
@@ -34,11 +33,8 @@ public abstract class AbstractLibro implements Libro {
         this.titolo = titolo;
         this.valutazione = valutazione;
         this.statoLettura = statoLettura;
-        for (Autore autore : autori) {aggiungiAutore(autore);}
-        if (genere != null) {
-            for (InfoExtra.GenereLibro g : genere) { aggiungiGenere(g); }
-        }
-
+        this.autori = new LinkedHashSet<>(autori);
+        this.generi = new LinkedHashSet<>(generi);
     }
 
     @Override
@@ -78,13 +74,13 @@ public abstract class AbstractLibro implements Libro {
     }
 
     @Override
-    public Collection<Autore> getAutori() {
-        return Collections.unmodifiableSet(autori);
+    public List<Autore> getAutori() {
+        return new ArrayList<>(autori);
     }
 
     @Override
-    public Collection<InfoExtra.GenereLibro> getGeneri() {
-        return Collections.unmodifiableSet(genere);
+    public List<InfoExtra.GenereLibro> getGeneri() {
+        return new ArrayList<>(generi);
     }
 
     @Override
@@ -107,14 +103,14 @@ public abstract class AbstractLibro implements Libro {
     public boolean aggiungiGenere(InfoExtra.GenereLibro genere){
         if(genere == null)
             return false;
-        return this.genere.add(genere);
+        return this.generi.add(genere);
     }
 
     @Override
     public boolean rimuoviGenere(InfoExtra.GenereLibro genere){
         if(genere == null)
             return false;
-        return this.genere.remove(genere);
+        return this.generi.remove(genere);
     }
 
     @Override
@@ -123,15 +119,40 @@ public abstract class AbstractLibro implements Libro {
         if(obj == this) return true;
         if(!(obj instanceof AbstractLibro)) return false;
 
-        AbstractLibro l = (AbstractLibro) obj;
-        return l.isbn.equals(this.isbn);
+        Libro altro = (Libro) obj;
+        if (!isbn.equals(altro.getIsbn())) return false;
+        if (!titolo.equals(altro.getTitolo())) return false;
+
+        if (valutazione == null) {
+            if (altro.getValutazione() != null) return false;
+        } else if (!valutazione.equals(altro.getValutazione())) {
+            return false;
+        }
+
+        if (statoLettura == null) {
+            if (altro.getStatoLettura() != null) return false;
+        } else if (!statoLettura.equals(altro.getStatoLettura())) {
+            return false;
+        }
+
+        if (!new HashSet<>(autori).equals(new HashSet<>(altro.getAutori()))) return false;
+        if (!new HashSet<>(generi).equals(new HashSet<>(altro.getGeneri()))) return false;
+
+        return true;
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
+
         result = prime * result + isbn.hashCode();
+        result = prime * result + titolo.hashCode();
+        result = prime * result + (valutazione == null ? 0 : valutazione.hashCode());
+        result = prime * result + (statoLettura == null ? 0 : statoLettura.hashCode());
+        for (Autore autore : autori) { result = prime * result + autore.hashCode(); }
+        for (InfoExtra.GenereLibro genere : generi) { result = prime * result + genere.hashCode(); }
+
         return result;
     }
 

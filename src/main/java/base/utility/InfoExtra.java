@@ -33,12 +33,32 @@ public class InfoExtra {
 
     public static class Valutazione{
         private final int stelle;
+
         public Valutazione(int stelle){
             if(stelle < 0 || stelle > 5) throw new IllegalArgumentException("Stelle non validi");
             this.stelle = stelle;
         }
+
         public int getStelle() {
             return stelle;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Valutazione)) return false;
+            Valutazione that = (Valutazione) o;
+            return stelle == that.stelle;
+        }
+
+        @Override
+        public int hashCode() {
+            return Integer.hashCode(stelle);
+        }
+
+        @Override
+        public String toString() {
+            return stelle + " stelle";
         }
     }
 

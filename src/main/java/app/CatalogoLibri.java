@@ -16,9 +16,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Collection;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -121,7 +120,7 @@ public class CatalogoLibri extends JFrame {
         return utenteSelezionato.get();
     }
 
-    public String selezionaUtenteEsistente(Set<String> utenti) {
+    public String selezionaUtenteEsistente(List<String> utenti) {
         if (utenti == null || utenti.isEmpty())
             throw new IllegalArgumentException("Nessun utente registrato");
 
@@ -181,7 +180,7 @@ public class CatalogoLibri extends JFrame {
         frame.setSize(800, 600);
 
         // Preparazione della tabella
-        JTable tabella = creaTabellaPrincipale(libreriaHub.visualizzaLibri());
+        JTable tabella = creaTabellaPrincipale(libreriaHub.visualizzaLibri(),null);
         JScrollPane scrollPane = new JScrollPane(tabella);
 
         // Preparazione dei pulsanti
@@ -202,20 +201,31 @@ public class CatalogoLibri extends JFrame {
         frame.setVisible(true);
     }
 
-    private JTable creaTabellaPrincipale(List<Libro> libri) {
-        String[] colonne = {"Titolo", "Autori", "Genere", "ISBN"};
+    private JTable creaTabellaPrincipale(List<Libro> libri, TipoOrdinamento tipoOrdinamento) {
+
+        String nomeColonna = "ISBN"; // Default
+        if (TipoOrdinamento.VALUTAZIONE.equals(tipoOrdinamento)) nomeColonna = "Valutazione";
+        else if (TipoOrdinamento.STATO_LETTURA.equals(tipoOrdinamento)) nomeColonna = "Stato lettura";
+
+        String[] colonne = {"Titolo", "Autori", "Genere", nomeColonna};
         Object[][] dati = new Object[libri.size()][4];
 
-        // Popolo i dati
         for (int i = 0; i < libri.size(); i++) {
             Libro libro = libri.get(i);
             dati[i][0] = valoreOrPlaceholder(libro.getTitolo());
             dati[i][1] = valoreOrPlaceholder(convertiGruppoInString(libro.getAutori()));
-            dati[i][2] = valoreOrPlaceholder((convertiGruppoInString(libro.getGeneri())));
-            dati[i][3] = valoreOrPlaceholder(libro.getIsbn());
+            dati[i][2] = valoreOrPlaceholder(convertiGruppoInString(libro.getGeneri()));
+
+            // Quarta colonna in base alla scelta
+            if (TipoOrdinamento.VALUTAZIONE.equals(tipoOrdinamento)) {
+                dati[i][3] = valoreOrPlaceholder(String.valueOf(libro.getValutazione() != null ? libro.getValutazione().getStelle() + " stelle" : "--"));
+            } else if (TipoOrdinamento.STATO_LETTURA.equals(tipoOrdinamento)) {
+                dati[i][3] = valoreOrPlaceholder(String.valueOf(libro.getStatoLettura() != null ? libro.getStatoLettura().toString() : "--"));
+            } else {
+                dati[i][3] = valoreOrPlaceholder(libro.getIsbn());
+            }
         }
 
-        // Creo tabella personalizzata
         JTable tabella = new JTable(dati, colonne) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -326,12 +336,14 @@ public class CatalogoLibri extends JFrame {
 
         String[] labels = {"Titolo:", "Autori:", "Genere:", "Valutazione:", "Stato di lettura:", "ISBN:"};
         String[] values = {
-                libro.getTitolo(),
-                libro.getAutori().stream().map(Object::toString).collect(Collectors.joining(", ")),
-                libro.getGeneri().stream().map(Object::toString).collect(Collectors.joining(", ")),
-                libro.getValutazione().getStelle() + " stelle",
-                libro.getStatoLettura().toString(),
-                libro.getIsbn()
+                libro.getTitolo() != null ? libro.getTitolo() : "--",
+                !libro.getAutori().isEmpty() ?
+                        libro.getAutori().stream().map(Object::toString).collect(Collectors.joining(", ")) : "--",
+                !libro.getGeneri().isEmpty() ?
+                        libro.getGeneri().stream().map(Object::toString).collect(Collectors.joining(", ")) : "--",
+                libro.getValutazione() != null ? libro.getValutazione().getStelle() + " stelle" : "--",
+                libro.getStatoLettura() != null ? libro.getStatoLettura().toString() : "--",
+                libro.getIsbn() != null ? libro.getIsbn() : "--"
         };
 
         for (int i = 0; i < labels.length; i++) {
@@ -370,7 +382,7 @@ public class CatalogoLibri extends JFrame {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(700, 600);
 
-        JTable tabella = creaTabellaPrincipale(lista);
+        JTable tabella = creaTabellaPrincipale(lista, tipo);
         JScrollPane scrollPane = new JScrollPane(tabella);
 
         JButton tornaHome = new JButton("Torna alla home");

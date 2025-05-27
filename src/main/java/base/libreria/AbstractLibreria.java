@@ -3,16 +3,17 @@ package base.libreria;
 import base.libro.Libro;
 import salvataggio.StorageService;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public abstract class AbstractLibreria implements Libreria {
 
     private final StorageService storageService;
 
     private final String utenteCorrente;
-    private final Set<Libro> libriUtente;
+    private final List<Libro> libriUtente;
 
 
     public AbstractLibreria(StorageService storageService, String utenteCorrente) {
@@ -21,7 +22,9 @@ public abstract class AbstractLibreria implements Libreria {
 
         this.utenteCorrente = utenteCorrente;
         this.storageService = storageService;
-        libriUtente = storageService.caricaLibreria();
+
+        Collection<Libro> libriCaricati = storageService.caricaLibreria();
+        this.libriUtente = new ArrayList<>(libriCaricati);
     }
 
     @Override
@@ -30,8 +33,8 @@ public abstract class AbstractLibreria implements Libreria {
     }
 
     @Override
-    public synchronized Set<Libro> getLibriUtente() {
-        return new HashSet<>(libriUtente);
+    public synchronized List<Libro> getLibriUtente() {
+        return new ArrayList<>(libriUtente);
     }
 
     @Override
@@ -53,11 +56,14 @@ public abstract class AbstractLibreria implements Libreria {
     }
 
     @Override
-    public synchronized boolean modificaLibro(Libro libroOriginale, Libro libroModificato){
-        if(!libriUtente.contains(libroOriginale))
+    public synchronized boolean modificaLibro(Libro libroOriginale, Libro libroModificato) {
+        if (libroOriginale == null || libroModificato == null)
             return false;
-        libriUtente.remove(libroOriginale);
-        libriUtente.add(libroModificato);
+        if (!libriUtente.contains(libroOriginale))
+            return false;
+
+        int indice = libriUtente.indexOf(libroOriginale);
+        libriUtente.set(indice, libroModificato);
         storageService.salvaLibreria(libriUtente);
         return true;
     }
@@ -92,5 +98,4 @@ public abstract class AbstractLibreria implements Libreria {
         result = prime * result + libriUtente.hashCode();
         return result;
     }
-
 }

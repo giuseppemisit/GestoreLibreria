@@ -1,11 +1,9 @@
 package app.utenti;
 
-import base.libro.Libro;
 import salvataggio.JsonStorageService;
 import salvataggio.StorageService;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class ConcreteUserManager implements UserManager {
 
@@ -14,12 +12,13 @@ public class ConcreteUserManager implements UserManager {
 
     public ConcreteUserManager(){
         this.storageService = new JsonStorageService(null);
-        this.utentiRegistrati = storageService.caricaUtenti();
+        Collection<String> utentiCaricati = storageService.caricaUtenti();
+        this.utentiRegistrati = new LinkedHashSet<>(utentiCaricati);
     }
 
     @Override
-    public synchronized Set<String> utentiRegistrati() {
-        return new HashSet<>(utentiRegistrati);
+    public synchronized List<String> utentiRegistrati() {
+        return new ArrayList<>(utentiRegistrati);
     }
 
     @Override
@@ -31,9 +30,9 @@ public class ConcreteUserManager implements UserManager {
     public synchronized boolean creaNuovoUtente(String username) {
         if(utentiRegistrati.contains(username))
             return false;
-        Set<Libro> fileVuoto = new HashSet<>();
+        // Crea una libreria vuota per l'utente'
         StorageService fileSalvataggio = new JsonStorageService(username);
-        fileSalvataggio.salvaLibreria(fileVuoto);
+        fileSalvataggio.salvaLibreria(new ArrayList<>());
         utentiRegistrati.add(username);
         storageService.salvaUtenti(utentiRegistrati);
         return true;

@@ -2,7 +2,7 @@ package base.libreria;
 
 import base.libro.Libro;
 
-import java.util.Set;
+import java.util.List;
 
 public interface Libreria {
 
@@ -14,9 +14,9 @@ public interface Libreria {
 
     /**
      * Restituisce i libri associati all'utente corrente.
-     * @return un set contenente i libri dell'utente corrente
+     * @return una lista contenente i libri dell'utente corrente  // Aggiornato commento
      */
-    Set<Libro> getLibriUtente();
+    List<Libro> getLibriUtente();
 
     /**
      * Aggiunge il libro alla Libreria
@@ -38,5 +38,4 @@ public interface Libreria {
      * @return true se è stato modificato,
      */
     boolean modificaLibro(Libro libroOriginale, Libro libroModificato);
-
 }

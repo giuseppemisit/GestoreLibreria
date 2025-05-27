@@ -9,7 +9,9 @@ public class ParametriFiltro implements Parametri {
     private final InfoExtra.Valutazione valutazione;
     private final InfoExtra.StatoLettura statoLettura;
 
-    public ParametriFiltro(InfoExtra.GenereLibro genere, InfoExtra.Valutazione valutazione, InfoExtra.StatoLettura statoLettura){
+    public ParametriFiltro(InfoExtra.GenereLibro genere,
+                           InfoExtra.Valutazione valutazione,
+                           InfoExtra.StatoLettura statoLettura){
         this.genere = genere;
         this.valutazione = valutazione;
         this.statoLettura = statoLettura;

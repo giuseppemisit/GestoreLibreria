@@ -18,21 +18,16 @@ public class OrdinaPerStatoDiLettura extends AbstractOrdina {
         if (stato1 == null) return -1;
         if (stato2 == null) return 1;
 
-        // Ordina secondo la priorità definita per gli stati di lettura
         return getPriorita(stato1) - getPriorita(stato2);
     }
 
-    // Priorità degli stati di lettura
     private int getPriorita(InfoExtra.StatoLettura stato) {
         switch (stato) {
-            case IN_LETTURA:
-                return 0;  // Priorità più alta
-            case DA_LEGGERE:
-                return 1;
-            case LETTO:
-                return 2;  // Priorità più bassa
-            default:
-                return 3;  // Valore predefinito
+            case IN_LETTURA: return 0; // Priorità più alta (viene prima)
+            case DA_LEGGERE: return 1; // Priorità media
+            case LETTO: return 2; // Priorità bassa
+            default: return 3;
         }
     }
+
 }

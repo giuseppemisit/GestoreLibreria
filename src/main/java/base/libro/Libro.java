@@ -3,7 +3,7 @@ package base.libro;
 import base.utility.Autore;
 import base.utility.InfoExtra;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface Libro extends Cloneable {
 
@@ -21,15 +21,15 @@ public interface Libro extends Cloneable {
 
     /**
      * Mostra gli autori del libro
-     * @return una collezione di autori non modificabili
+     * @return una lista di autori non modificabili
      */
-    Collection<Autore> getAutori();
+    List<Autore> getAutori();
 
     /**
-     * Mostra i genere letterario del libro
-     * @return una collezione di genere letterario non modificabili
+     * Mostra i generi del libro
+     * @return una lista di generi non modificabili
      */
-    Collection<InfoExtra.GenereLibro> getGeneri();
+    List<InfoExtra.GenereLibro> getGeneri();
 
     /**
      * Aggiunge un autore al libro

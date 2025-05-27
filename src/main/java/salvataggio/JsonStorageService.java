@@ -9,7 +9,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.lang.reflect.Type;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,26 +47,26 @@ public class JsonStorageService implements StorageService {
 
 
     @Override
-    public Set<String> caricaUtenti() {
+    public Collection<String> caricaUtenti() {
         try {
             File file = new File(percorsoUtenti);
             if (!file.exists()) {
-                return new HashSet<>();
+                return new ArrayList<>();
             }
 
             try (FileReader reader = new FileReader(file)) {
                 Type type = new TypeToken<Set<String>>() {}.getType();
-                Set<String> utenti = gson.fromJson(reader, type);
-                return utenti != null ? utenti : new HashSet<>();
+                Collection<String> utenti = gson.fromJson(reader, type);
+                return utenti != null ? utenti : new ArrayList<>();
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore durante il caricamento degli utenti", e);
-            return new HashSet<>();
+            return new ArrayList<>();
         }
     }
 
     @Override
-    public Set<Libro> caricaLibreria() {
+    public Collection<Libro> caricaLibreria() {
         // Se username è null, non possiamo caricare la libreria
         if (percorsoLibreria == null) {
             throw new IllegalStateException("Non è possibile caricare la libreria senza specificare un utente");
@@ -73,22 +75,22 @@ public class JsonStorageService implements StorageService {
         try {
             File file = new File(percorsoLibreria);
             if (!file.exists()) {
-                return new HashSet<>();
+                return new ArrayList<>();
             }
 
             try (FileReader reader = new FileReader(file)) {
-                Type type = new TypeToken<Set<Libro>>() {}.getType();
-                Set<Libro> libreria = gson.fromJson(reader, type);
-                return libreria != null ? libreria : new HashSet<>();
+                Type type = new TypeToken<List<Libro>>() {}.getType();
+                Collection<Libro> libreria = gson.fromJson(reader, type);
+                return libreria != null ? libreria : new ArrayList<>();
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore durante il caricamento della libreria", e);
-            return new HashSet<>();
+            return new ArrayList<>();
         }
     }
 
     @Override
-    public boolean salvaUtenti(Set<String> utenti) {
+    public boolean salvaUtenti(Collection<String> utenti) {
         try {
             try (FileWriter writer = new FileWriter(percorsoUtenti)) {
                 gson.toJson(utenti, writer);
@@ -101,7 +103,7 @@ public class JsonStorageService implements StorageService {
     }
 
     @Override
-    public boolean salvaLibreria(Set<Libro> libreria) {
+    public boolean salvaLibreria(Collection<Libro> libreria) {
         // Se username è null, non possiamo salvare la libreria
         if (percorsoLibreria == null) {
             throw new IllegalStateException("Non è possibile salvare la libreria senza specificare un utente");
@@ -131,5 +133,4 @@ public class JsonStorageService implements StorageService {
         }
         return true; // Se il file non esiste, l'operazione è considerata riuscita
     }
-
 }

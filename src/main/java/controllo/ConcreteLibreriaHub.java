@@ -13,6 +13,7 @@ import gestione.commands.AggiungiLibro;
 import gestione.commands.ModificaLibro;
 import gestione.commands.RimuoviLibro;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -57,7 +58,7 @@ public class ConcreteLibreriaHub implements LibreriaHub {
 
     @Override
     public List<Libro> visualizzaLibri() {
-        return libreria.getLibriUtente().stream().toList();
+        return new ArrayList<>(libreria.getLibriUtente());
     }
 
     @Override
