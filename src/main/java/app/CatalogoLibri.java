@@ -180,7 +180,7 @@ public class CatalogoLibri extends JFrame {
         frame.setSize(800, 600);
 
         // Preparazione della tabella
-        JTable tabella = creaTabellaPrincipale(libreriaHub.visualizzaLibri(),null);
+        JTable tabella = creaTabellaLibri(libreriaHub.visualizzaLibri(),null);
         JScrollPane scrollPane = new JScrollPane(tabella);
 
         // Preparazione dei pulsanti
@@ -201,7 +201,238 @@ public class CatalogoLibri extends JFrame {
         frame.setVisible(true);
     }
 
-    private JTable creaTabellaPrincipale(List<Libro> libri, TipoOrdinamento tipoOrdinamento) {
+
+
+
+    /// questi li devo mogliorare
+    ///
+    private JPanel creaPannelloPulsanti(JFrame frame, JTable tabella, List<Libro> libri, String username) {
+        JPanel pannelloPulsanti = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        // Pulsante Log out
+        JButton pulsanteLogout = new JButton("Log out");
+        pulsanteLogout.setForeground(Color.RED);
+        pulsanteLogout.setFocusPainted(false);
+        pulsanteLogout.addActionListener(e -> {
+            frame.dispose(); // Chiude la finestra corrente
+            this.main(new String[0]); // Riavvia l'applicazione
+        });
+
+        // Pulsante Dettagli
+        JButton pulsanteDettagli = new JButton("Dettagli");
+        pulsanteDettagli.setForeground(new Color(0x007CBE));
+        pulsanteDettagli.setFocusPainted(false);
+        pulsanteDettagli.addActionListener(e -> {
+            int rigaSelezionata = tabella.getSelectedRow();
+            if (rigaSelezionata != -1) {
+                Libro libroSelezionato = libri.get(rigaSelezionata);
+                mostraInfoLibro(libroSelezionato);
+            } else {
+                JOptionPane.showMessageDialog(
+                        frame,
+                        "Nessun libro selezionato",
+                        "Nessuna selezione",
+                        JOptionPane.WARNING_MESSAGE
+                );
+            }
+        });
+
+        // Pulsante Ordina per
+        JButton pulsanteOrdina = new JButton("Ordina per");
+        pulsanteOrdina.setFocusPainted(false);
+        pulsanteOrdina.addActionListener(e -> {
+            TipoOrdinamento tipo = selezionaOrdinamento(TipoOrdinamento.values());
+            visualizzaConOrdinamento(libreriaHub.visualizzaLibriOrdinati(tipo), tipo);
+        });
+
+        // Pulsante Filtri
+        JButton pulsanteFiltri = new JButton("Filtri");
+        pulsanteFiltri.setFocusPainted(false);
+        pulsanteFiltri.addActionListener(e -> {
+            //Parametri parametri = selezionaParametriFiltro();
+            //visualizzaRisultati(libreriaHub.filtraLibri(parametri));
+        });
+
+        // Pulsante Cerca
+        JButton pulsanteCerca = new JButton("Cerca");
+        pulsanteCerca.setFocusPainted(false);
+        pulsanteCerca.addActionListener(e -> {
+            //Parametri parametri = selezionaParametriRicerca();
+            //visualizzaRisultati(libreriaHub.cercaLibri(parametri));
+        });
+
+        // Pulsante Aggiungi +
+        JButton pulsanteAggiungiLibro = new JButton("Aggiungi +");
+        pulsanteAggiungiLibro.setFocusPainted(false);
+        pulsanteAggiungiLibro.addActionListener(e -> {
+            //Libro nuovoLibro = creaNuovoLibro();
+            //libreriaHub.aggiungiLibro(nuovoLibro);
+        });
+
+        // Pulsante Annulla ultima azione
+        JButton pulsanteAnnulla = new JButton("Annulla ultima azione");
+        pulsanteAnnulla.setForeground(new Color(0xFF8C00));
+        pulsanteAnnulla.setFocusPainted(false);
+        pulsanteAnnulla.addActionListener(e -> {
+            try {
+                libreriaHub.annullaAggiornamento();
+                aggiornaTabella(tabella, libreriaHub.visualizzaLibri());
+                mostraMessaggio("Ultima azione annullata con successo!");
+            } catch (Exception ex) {
+                mostraErrore("Impossibile annullare l'ultima azione: " + ex.getMessage());
+            }
+        });
+
+        // Aggiunta dei pulsanti al pannello, nell'ordine richiesto
+        pannelloPulsanti.add(pulsanteLogout);
+        pannelloPulsanti.add(pulsanteDettagli);
+        pannelloPulsanti.add(pulsanteOrdina);
+        pannelloPulsanti.add(pulsanteFiltri);
+        pannelloPulsanti.add(pulsanteCerca);
+        pannelloPulsanti.add(pulsanteAggiungiLibro);
+        pannelloPulsanti.add(pulsanteAnnulla);
+
+        return pannelloPulsanti;
+    }
+
+
+    public void mostraInfoLibro(Libro libro) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        String[] labels = {"Titolo:", "Autori:", "Genere:", "Valutazione:", "Stato di lettura:", "ISBN:"};
+        String[] values = {
+                libro.getTitolo() != null ? libro.getTitolo() : "--",
+                !libro.getAutori().isEmpty() ?
+                        libro.getAutori().stream().map(Object::toString).collect(Collectors.joining(", ")) : "--",
+                !libro.getGeneri().isEmpty() ?
+                        libro.getGeneri().stream().map(Object::toString).collect(Collectors.joining(", ")) : "--",
+                libro.getValutazione() != null ? libro.getValutazione().getStelle() + " stelle" : "--",
+                libro.getStatoLettura() != null ? libro.getStatoLettura().toString() : "--",
+                libro.getIsbn() != null ? libro.getIsbn() : "--"
+        };
+
+        JPanel infoPanel = new JPanel(new GridLayout(labels.length, 2, 10, 10));
+
+        for (int i = 0; i < labels.length; i++) {
+            JLabel label = new JLabel(labels[i]);
+            label.setHorizontalAlignment(SwingConstants.RIGHT);
+            JTextField field = new JTextField(values[i]);
+            field.setEditable(false);
+            infoPanel.add(label);
+            infoPanel.add(field);
+        }
+
+        panel.add(infoPanel);
+        panel.add(Box.createVerticalStrut(15));
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton btnModifica = new JButton("Modifica");
+        JButton btnElimina = new JButton("Elimina");
+
+        btnModifica.setFocusPainted(false);
+        btnElimina.setFocusPainted(false);
+        btnElimina.setForeground(Color.RED);
+
+        btnModifica.addActionListener(e -> {
+            SwingUtilities.getWindowAncestor(panel).dispose();
+            modificaLibro(libro);
+        });
+
+        btnElimina.addActionListener(e -> {
+            Component finestra = SwingUtilities.getWindowAncestor(panel);
+            if (JOptionPane.showConfirmDialog(finestra, "Eliminare \"" + libro.getTitolo() + "\"?",
+                    "Conferma", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                SwingUtilities.getWindowAncestor(panel).dispose();
+                try {
+                    libreriaHub.rimuoviLibro(libro);
+                } catch (Exception ex) {
+                    mostraErrore(ex.getMessage());
+                    return;
+                }
+                mostraMessaggio("Libro eliminato con successo!");
+                aggiornaTabella(tabella, libreriaHub.visualizzaLibri());
+            }
+        });
+
+        buttonPanel.add(btnModifica);
+        buttonPanel.add(btnElimina);
+        panel.add(buttonPanel);
+
+        JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(panel), panel, "Informazioni Libro", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Metodo per modificare il libro (da implementare)
+    private void modificaLibro(Libro libro) {
+        // Implementa qui la logica per modificare il libro
+        // Ad esempio, apri un dialog di modifica o una nuova finestra
+        System.out.println("Modifica libro: " + libro.getTitolo());
+    }
+
+    public TipoOrdinamento selezionaOrdinamento(TipoOrdinamento[] opzioni) {
+        if (opzioni == null || opzioni.length == 0)
+            throw new IllegalArgumentException("Nessuna opzione di ordinamento disponibile");
+
+        TipoOrdinamento selezionato = (TipoOrdinamento) JOptionPane.showInputDialog(
+                this,
+                "Seleziona un criterio di ordinamento:",
+                "Ordina per",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                opzioni,
+                opzioni[0]
+        );
+        if (selezionato == null)
+            throw new RuntimeException("Ordinamento annullato");
+        return selezionato;
+    }
+
+    private void visualizzaConOrdinamento(List<Libro> lista, TipoOrdinamento tipo){
+        JFrame frame = new JFrame("Ordinamento per: " + tipo.name());
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(700, 600);
+
+        JTable tabella = creaTabellaLibri(lista, tipo);
+        JScrollPane scrollPane = new JScrollPane(tabella);
+
+        JButton tornaHome = new JButton("Torna alla home");
+        tornaHome.addActionListener(e -> frame.dispose());
+
+        JPanel pannelloBottom = new JPanel(new FlowLayout());
+        pannelloBottom.add(tornaHome);
+
+        frame.setLayout(new BorderLayout());
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(pannelloBottom, BorderLayout.SOUTH);
+
+        frame.setLocationRelativeTo(this);
+        frame.setVisible(true);
+    }
+
+
+    // METODI COMUNI DI UTILITY
+    private void mostraErrore(String messaggio) {
+        JOptionPane.showMessageDialog(this, messaggio, "Errore", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void mostraMessaggio(String messaggio) {
+        JOptionPane.showMessageDialog(this, messaggio, "Informazione", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private <T> String convertiGruppoInString(Collection<T> elementi) {
+        StringBuilder result = new StringBuilder();
+        for (T elemento : elementi) {
+            if (result.length() > 0) { result.append(", "); }
+            result.append(elemento.toString());
+        }
+        return result.toString();
+    }
+
+    private String valoreOrPlaceholder(String valore) {
+        return (valore == null || valore.trim().isEmpty()) ? "--" : valore;
+    }
+
+    private JTable creaTabellaLibri(List<Libro> libri, TipoOrdinamento tipoOrdinamento) {
 
         String nomeColonna = "ISBN"; // Default
         if (TipoOrdinamento.VALUTAZIONE.equals(tipoOrdinamento)) nomeColonna = "Valutazione";
@@ -253,174 +484,6 @@ public class CatalogoLibri extends JFrame {
         return tabella;
     }
 
-
-    /// questi li devo mogliorare
-    ///
-    private JPanel creaPannelloPulsanti(JFrame frame, JTable tabella, List<Libro> libri, String username) {
-        JPanel pannelloPulsanti = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
-        // Pulsante Log out
-        JButton pulsanteLogout = new JButton("Log out");
-        pulsanteLogout.setForeground(Color.RED);
-        pulsanteLogout.setFocusPainted(false);
-        pulsanteLogout.addActionListener(e -> {
-            frame.dispose(); // Chiude la finestra corrente
-            this.main(new String[0]); // Riavvia l'applicazione
-        });
-
-        // Pulsante Dettagli
-        JButton pulsanteDettagli = new JButton("Dettagli");
-        pulsanteDettagli.setForeground(new Color(0x007CBE));
-        pulsanteDettagli.setFocusPainted(false);
-        pulsanteDettagli.addActionListener(e -> {
-            int rigaSelezionata = tabella.getSelectedRow();
-            if (rigaSelezionata != -1) {
-                Libro libroSelezionato = libri.get(rigaSelezionata);
-                mostraInfoLibro(libroSelezionato);
-            } else {
-                JOptionPane.showMessageDialog(
-                        frame,
-                        "Nessun libro selezionato",
-                        "Nessuna selezione",
-                        JOptionPane.WARNING_MESSAGE
-                );
-            }
-        });
-
-
-        // Pulsante Ordina per
-        JButton pulsanteOrdina = new JButton("Ordina per");
-        pulsanteOrdina.setFocusPainted(false);
-        pulsanteOrdina.addActionListener(e -> {
-            TipoOrdinamento tipo = selezionaOrdinamento(TipoOrdinamento.values());
-            visualizzaConOrdinamento(libreriaHub.visualizzaLibriOrdinati(tipo), tipo);
-        });
-
-        // Pulsante Filtri
-        JButton pulsanteFiltri = new JButton("Filtri");
-        pulsanteFiltri.setFocusPainted(false);
-        pulsanteFiltri.addActionListener(e -> {
-            //Parametri parametri = selezionaParametriFiltro();
-            //visualizzaRisultati(libreriaHub.filtraLibri(parametri));
-        });
-
-        // Pulsante Cerca
-        JButton pulsanteCerca = new JButton("Cerca");
-        pulsanteCerca.setFocusPainted(false);
-        pulsanteCerca.addActionListener(e -> {
-            //Parametri parametri = selezionaParametriRicerca();
-            //visualizzaRisultati(libreriaHub.cercaLibri(parametri));
-        });
-
-        // Pulsante Aggiungi +
-        JButton pulsanteAggiungiLibro = new JButton("Aggiungi +");
-        pulsanteAggiungiLibro.setFocusPainted(false);
-        pulsanteAggiungiLibro.addActionListener(e -> {
-            //Libro nuovoLibro = creaNuovoLibro();
-            //libreriaHub.aggiungiLibro(nuovoLibro);
-        });
-
-        // Aggiunta dei pulsanti al pannello, nell'ordine richiesto
-        pannelloPulsanti.add(pulsanteLogout);
-        pannelloPulsanti.add(pulsanteDettagli);
-        pannelloPulsanti.add(pulsanteOrdina);
-        pannelloPulsanti.add(pulsanteFiltri);
-        pannelloPulsanti.add(pulsanteCerca);
-        pannelloPulsanti.add(pulsanteAggiungiLibro);
-        return pannelloPulsanti;
-    }
-
-    public void mostraInfoLibro(Libro libro) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-        String[] labels = {"Titolo:", "Autori:", "Genere:", "Valutazione:", "Stato di lettura:", "ISBN:"};
-        String[] values = {
-                libro.getTitolo() != null ? libro.getTitolo() : "--",
-                !libro.getAutori().isEmpty() ?
-                        libro.getAutori().stream().map(Object::toString).collect(Collectors.joining(", ")) : "--",
-                !libro.getGeneri().isEmpty() ?
-                        libro.getGeneri().stream().map(Object::toString).collect(Collectors.joining(", ")) : "--",
-                libro.getValutazione() != null ? libro.getValutazione().getStelle() + " stelle" : "--",
-                libro.getStatoLettura() != null ? libro.getStatoLettura().toString() : "--",
-                libro.getIsbn() != null ? libro.getIsbn() : "--"
-        };
-
-        for (int i = 0; i < labels.length; i++) {
-            panel.add(new JLabel(labels[i]));
-            JTextField field = new JTextField(values[i]);
-            field.setEditable(false);
-            panel.add(field);
-            if (i < labels.length - 1) {
-                panel.add(Box.createVerticalStrut(10));
-            }
-        }
-
-        JOptionPane.showMessageDialog(this, panel, "Informazioni Libro", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public TipoOrdinamento selezionaOrdinamento(TipoOrdinamento[] opzioni) {
-        if (opzioni == null || opzioni.length == 0)
-            throw new IllegalArgumentException("Nessuna opzione di ordinamento disponibile");
-
-        TipoOrdinamento selezionato = (TipoOrdinamento) JOptionPane.showInputDialog(
-                this,
-                "Seleziona un criterio di ordinamento:",
-                "Ordina per",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                opzioni,
-                opzioni[0]
-        );
-        if (selezionato == null)
-            throw new RuntimeException("Ordinamento annullato");
-        return selezionato;
-    }
-
-    private void visualizzaConOrdinamento(List<Libro> lista, TipoOrdinamento tipo){
-        JFrame frame = new JFrame("Ordinamento per: " + tipo.name());
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(700, 600);
-
-        JTable tabella = creaTabellaPrincipale(lista, tipo);
-        JScrollPane scrollPane = new JScrollPane(tabella);
-
-        JButton tornaHome = new JButton("Torna alla home");
-        tornaHome.addActionListener(e -> frame.dispose());
-
-        JPanel pannelloBottom = new JPanel(new FlowLayout());
-        pannelloBottom.add(tornaHome);
-
-        frame.setLayout(new BorderLayout());
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(pannelloBottom, BorderLayout.SOUTH);
-
-        frame.setLocationRelativeTo(this);
-        frame.setVisible(true);
-    }
-
-
-    // METODI COMUNI UTILITY
-    private void mostraErrore(String messaggio) {
-        JOptionPane.showMessageDialog(this, messaggio, "Errore", JOptionPane.ERROR_MESSAGE);
-    }
-
-    private void mostraMessaggio(String messaggio) {
-        JOptionPane.showMessageDialog(this, messaggio, "Informazione", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private <T> String convertiGruppoInString(Collection<T> elementi) {
-        StringBuilder result = new StringBuilder();
-        for (T elemento : elementi) {
-            if (result.length() > 0) { result.append(", "); }
-            result.append(elemento.toString());
-        }
-        return result.toString();
-    }
-
-    private String valoreOrPlaceholder(String valore) {
-        return (valore == null || valore.trim().isEmpty()) ? "--" : valore;
-    }
 
 
 }
