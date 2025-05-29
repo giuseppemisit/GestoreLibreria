@@ -52,8 +52,11 @@ public class ConcreteLibreriaHub implements LibreriaHub {
 
     @Override
     public void annullaAggiornamento() {
-        if(gestoreAggiorna.haComandoDaAnnullare())
+        if (gestoreAggiorna.haComandoDaAnnullare()) {
             gestoreAggiorna.annullaComando();
+        } else {
+            throw new IllegalStateException("Nessun comando da annullare.");
+        }
     }
 
     @Override

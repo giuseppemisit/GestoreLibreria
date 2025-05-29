@@ -3,19 +3,20 @@ package app;
 import app.utenti.ConcreteUserManager;
 import base.libreria.Libreria;
 import base.libreria.LibreriaJson;
+import base.libro.ConcreteLibro;
 import base.libro.Libro;
+import base.utility.Autore;
+import base.utility.InfoExtra;
 import controllo.ConcreteLibreriaHub;
 import controllo.LibreriaHub;
 import app.utenti.UserManager;
 import esplora.ordina.utility.TipoOrdinamento;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -226,7 +227,7 @@ public class CatalogoLibri extends JFrame {
             int rigaSelezionata = tabella.getSelectedRow();
             if (rigaSelezionata != -1) {
                 Libro libroSelezionato = libri.get(rigaSelezionata);
-                mostraInfoLibro(libroSelezionato);
+                mostraInfoLibro(libroSelezionato, tabella);
             } else {
                 JOptionPane.showMessageDialog(
                         frame,
@@ -265,21 +266,24 @@ public class CatalogoLibri extends JFrame {
         JButton pulsanteAggiungiLibro = new JButton("Aggiungi +");
         pulsanteAggiungiLibro.setFocusPainted(false);
         pulsanteAggiungiLibro.addActionListener(e -> {
-            //Libro nuovoLibro = creaNuovoLibro();
-            //libreriaHub.aggiungiLibro(nuovoLibro);
+            Libro nuovoLibro = creaLibro(tabella, null);
+            if (nuovoLibro != null) {
+                libreriaHub.aggiungiLibro(nuovoLibro);
+            }
+            aggiornaTabella(tabella, libreriaHub.visualizzaLibri(), null);
         });
 
         // Pulsante Annulla ultima azione
-        JButton pulsanteAnnulla = new JButton("Annulla ultima azione");
+        JButton pulsanteAnnulla = new JButton("Annulla Ultima azione");
         pulsanteAnnulla.setForeground(new Color(0xFF8C00));
         pulsanteAnnulla.setFocusPainted(false);
         pulsanteAnnulla.addActionListener(e -> {
             try {
                 libreriaHub.annullaAggiornamento();
-                aggiornaTabella(tabella, libreriaHub.visualizzaLibri());
+                aggiornaTabella(tabella, libreriaHub.visualizzaLibri(), null);
                 mostraMessaggio("Ultima azione annullata con successo!");
             } catch (Exception ex) {
-                mostraErrore("Impossibile annullare l'ultima azione: " + ex.getMessage());
+                mostraErrore(ex.getMessage());
             }
         });
 
@@ -296,11 +300,11 @@ public class CatalogoLibri extends JFrame {
     }
 
 
-    public void mostraInfoLibro(Libro libro) {
+    public void mostraInfoLibro(Libro libro, JTable tabella) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        String[] labels = {"Titolo:", "Autori:", "Genere:", "Valutazione:", "Stato di lettura:", "ISBN:"};
+        String[] labels = {"Titolo:", "Autori:", "Generi:", "Valutazione:", "Stato di lettura:", "ISBN:"};
         String[] values = {
                 libro.getTitolo() != null ? libro.getTitolo() : "--",
                 !libro.getAutori().isEmpty() ?
@@ -336,7 +340,9 @@ public class CatalogoLibri extends JFrame {
 
         btnModifica.addActionListener(e -> {
             SwingUtilities.getWindowAncestor(panel).dispose();
-            modificaLibro(libro);
+            Libro libroMoficato = creaLibro(tabella, libro);
+            libreriaHub.modificaLibro(libro,libroMoficato);
+            aggiornaTabella(tabella, libreriaHub.visualizzaLibri(), null);
         });
 
         btnElimina.addActionListener(e -> {
@@ -351,7 +357,7 @@ public class CatalogoLibri extends JFrame {
                     return;
                 }
                 mostraMessaggio("Libro eliminato con successo!");
-                aggiornaTabella(tabella, libreriaHub.visualizzaLibri());
+                aggiornaTabella(tabella, libreriaHub.visualizzaLibri(), null);
             }
         });
 
@@ -359,13 +365,10 @@ public class CatalogoLibri extends JFrame {
         buttonPanel.add(btnElimina);
         panel.add(buttonPanel);
 
-        JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(panel), panel, "Informazioni Libro", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(tabella, panel, "Informazioni Libro", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // Metodo per modificare il libro (da implementare)
     private void modificaLibro(Libro libro) {
-        // Implementa qui la logica per modificare il libro
-        // Ad esempio, apri un dialog di modifica o una nuova finestra
         System.out.println("Modifica libro: " + libro.getTitolo());
     }
 
@@ -457,9 +460,14 @@ public class CatalogoLibri extends JFrame {
             }
         }
 
-        JTable tabella = new JTable(dati, colonne) {
+        DefaultTableModel model = new DefaultTableModel(dati, colonne) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable tabella = new JTable(model) {
             @Override
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
                 Component comp = super.prepareRenderer(renderer, row, column);
@@ -478,10 +486,137 @@ public class CatalogoLibri extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 int row = tabella.rowAtPoint(e.getPoint());
                 if (row == -1) { tabella.clearSelection(); } // Deseleziona se clicco su area vuota
-                else if (e.getClickCount() == 2) { mostraInfoLibro(libri.get(row)); } // Doppio click
+                else if (e.getClickCount() == 2) { mostraInfoLibro(libri.get(row), tabella); } // Doppio click
             }
         });
         return tabella;
+    }
+
+    private void aggiornaTabella(JTable tabella, List<Libro> libri, TipoOrdinamento tipoOrdinamento) {
+        DefaultTableModel modello = (DefaultTableModel) tabella.getModel();
+
+        modello.setRowCount(0);
+
+        String nomeQuartaColonna = modello.getColumnName(3); // Isbn
+        if ("Valutazione".equals(nomeQuartaColonna)) {
+            tipoOrdinamento = TipoOrdinamento.VALUTAZIONE;
+        } else if ("Stato lettura".equals(nomeQuartaColonna)) {
+            tipoOrdinamento = TipoOrdinamento.STATO_LETTURA;
+        }
+
+        // Aggiungo i nuovi dati
+        for (Libro libro : libri) {
+            Object[] riga = new Object[4];
+            riga[0] = valoreOrPlaceholder(libro.getTitolo());
+            riga[1] = valoreOrPlaceholder(convertiGruppoInString(libro.getAutori()));
+            riga[2] = valoreOrPlaceholder(convertiGruppoInString(libro.getGeneri()));
+
+            if (TipoOrdinamento.VALUTAZIONE.equals(tipoOrdinamento)) {
+                riga[3] = valoreOrPlaceholder(String.valueOf(libro.getValutazione() != null ? libro.getValutazione().getStelle() + " stelle" : "--"));
+            } else if (TipoOrdinamento.STATO_LETTURA.equals(tipoOrdinamento)) {
+                riga[3] = valoreOrPlaceholder(String.valueOf(libro.getStatoLettura() != null ? libro.getStatoLettura().toString() : "--"));
+            } else {
+                riga[3] = valoreOrPlaceholder(libro.getIsbn());
+            }
+
+            modello.addRow(riga);
+        }
+        modello.fireTableDataChanged();
+    }
+
+
+    public Libro creaLibro(JTable tabella, Libro libro) {
+        JTextField titoloField = new JTextField(20);
+        JTextField autoriField = new JTextField(20);
+
+        // Sostituito JComboBox con JList per selezione multipla
+        JList<InfoExtra.GenereLibro> generiList = new JList<>(InfoExtra.GenereLibro.values());
+        generiList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        generiList.setVisibleRowCount(4);
+        JScrollPane generiScrollPane = new JScrollPane(generiList);
+        generiScrollPane.setPreferredSize(new Dimension(200, 80));
+
+        JComboBox<Integer> valutazioneCombo = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5});
+        JComboBox<InfoExtra.StatoLettura> statoCombo = new JComboBox<>(InfoExtra.StatoLettura.values());
+        JTextField isbnField = new JTextField(13);
+
+        statoCombo.setSelectedIndex(-1);
+        valutazioneCombo.setSelectedItem(1);
+
+        if (libro != null) {
+            titoloField.setText(Optional.ofNullable(libro.getTitolo()).orElse(""));
+            if (libro.getAutori() != null)
+                autoriField.setText(libro.getAutori().stream()
+                        .map(a -> a.getNome() + " " + a.getCognome())
+                        .collect(Collectors.joining(", ")));
+
+            // Imposta i generi selezionati nella lista
+            if (libro.getGeneri() != null && !libro.getGeneri().isEmpty()) {
+                List<InfoExtra.GenereLibro> generiSelezionati = new ArrayList<>(libro.getGeneri());
+                int[] indici = generiSelezionati.stream()
+                        .mapToInt(genere -> Arrays.asList(InfoExtra.GenereLibro.values()).indexOf(genere))
+                        .toArray();
+                generiList.setSelectedIndices(indici);
+            }
+
+            if (libro.getValutazione() != null)
+                valutazioneCombo.setSelectedItem(libro.getValutazione().getStelle());
+            statoCombo.setSelectedItem(libro.getStatoLettura());
+            isbnField.setText(Optional.ofNullable(libro.getIsbn()).orElse(""));
+        }
+
+        isbnField.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                if (!Character.isDigit(e.getKeyChar()) || isbnField.getText().length() >= 13)
+                    e.consume();
+            }
+        });
+
+        String[] etichette = {"Titolo:", "Autori:", "Generi:", "Valutazione:", "Stato lettura:", "ISBN (13 cifre):"};
+        JComponent[] campi = {titoloField, autoriField, generiScrollPane, valutazioneCombo, statoCombo, isbnField};
+        JPanel formPanel = new JPanel(new GridLayout(etichette.length, 2, 10, 10));
+        for (int i = 0; i < etichette.length; i++) {
+            formPanel.add(new JLabel(etichette[i], SwingConstants.RIGHT));
+            formPanel.add(campi[i]);
+        }
+
+        int result = JOptionPane.showConfirmDialog(
+                SwingUtilities.getWindowAncestor(tabella),
+                formPanel,
+                libro != null ? "Modifica Libro" : "Crea Nuovo Libro",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                String titolo = titoloField.getText().trim();
+                String isbn = isbnField.getText().trim();
+                Integer stelle = (Integer) valutazioneCombo.getSelectedItem();
+
+                Set<Autore> autori = Arrays.stream(autoriField.getText().split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .map(nomeCompleto -> {
+                            String[] parts = nomeCompleto.split(" ", 2);
+                            return new Autore(parts[0], parts.length > 1 ? parts[1] : "");
+                        })
+                        .collect(Collectors.toSet());
+
+                // Raccogli tutti i generi selezionati
+                Set<InfoExtra.GenereLibro> generi = generiList.getSelectedValuesList().isEmpty()
+                        ? null
+                        : new HashSet<>(generiList.getSelectedValuesList());
+
+                InfoExtra.Valutazione valutazione = stelle != null ? new InfoExtra.Valutazione(stelle) : null;
+                InfoExtra.StatoLettura stato = (InfoExtra.StatoLettura) statoCombo.getSelectedItem();
+
+                return new ConcreteLibro(isbn, titolo, valutazione, stato, autori, generi);
+            } catch (Exception ex) {
+                mostraErrore("Errore: " + ex.getMessage());
+            }
+        }
+        return null;
     }
 
 
