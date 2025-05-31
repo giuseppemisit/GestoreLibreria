@@ -1,4 +1,4 @@
-package app.utenti;
+package controllo.utenti;
 
 import salvataggio.JsonStorageService;
 import salvataggio.StorageService;

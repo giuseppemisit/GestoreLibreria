@@ -3,7 +3,7 @@ package gestione.commands;
 import base.libro.Libro;
 import base.libreria.Libreria;
 
-public class AggiungiLibro extends AbstractCommandAggiorna {
+public class AggiungiLibro extends AbstractCommandGestione {
 
     public AggiungiLibro(Libreria libreria, Libro libro) {
         super(libreria, libro);

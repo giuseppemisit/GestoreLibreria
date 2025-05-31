@@ -1,4 +1,4 @@
-package esplora;
+package esplora.commands;
 
 import base.libro.Libro;
 import esplora.ordina.OrdinamentoContext;

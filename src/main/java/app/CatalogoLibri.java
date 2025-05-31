@@ -1,15 +1,16 @@
 package app;
 
-import app.utenti.ConcreteUserManager;
+import app.pannelli.SelezioneUtente;
+import controllo.utenti.ConcreteUserManager;
 import base.libreria.Libreria;
 import base.libreria.LibreriaJson;
 import base.libro.ConcreteLibro;
 import base.libro.Libro;
 import base.utility.Autore;
 import base.utility.InfoExtra;
-import controllo.ConcreteLibreriaHub;
-import controllo.LibreriaHub;
-import app.utenti.UserManager;
+import controllo.libreria.ConcreteLibreriaHub;
+import controllo.libreria.HubLibreria;
+import controllo.utenti.UserManager;
 import esplora.ordina.utility.TipoOrdinamento;
 
 import javax.swing.*;
@@ -19,21 +20,20 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class CatalogoLibri extends JFrame {
 
     private UserManager utenti;
-    private LibreriaHub libreriaHub;
+    private HubLibreria hubLibreria;
 
     public CatalogoLibri() {
         utenti = new ConcreteUserManager();
-        String username = homeGestioneUtenti();
+        String username =new SelezioneUtente().pannelloPrincipale(utenti);
 
         if (username != null && !username.isEmpty()) {
             Libreria lib = new LibreriaJson(username);
-            libreriaHub = new ConcreteLibreriaHub(lib);
+            hubLibreria = new ConcreteLibreriaHub(lib);
             homeGestioneLibri();
         } else { System.exit(0);}
     }
@@ -46,150 +46,26 @@ public class CatalogoLibri extends JFrame {
 
 
     // SELEZIONE E GESTIONE DEGLI UTENTI
-    public String homeGestioneUtenti() {
-        JDialog dialog = new JDialog((Frame) null, "Catalogo Libri", true);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.setSize(350, 400);
-        dialog.setResizable(false);
-        dialog.setLocationRelativeTo(null);
 
-        AtomicReference<String> utenteSelezionato = new AtomicReference<>();
-
-        JPanel mainPanel = new JPanel(new BorderLayout());
-
-        // Titolo
-        JLabel titolo = new JLabel("👤 Area utente", JLabel.CENTER);
-        titolo.setFont(new Font("Dialog", Font.BOLD, 18));
-        titolo.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        mainPanel.add(titolo, BorderLayout.NORTH);
-
-        // Pulsanti
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 10, 10));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-
-        JButton accediBtn = new JButton("Accedi");
-        JButton nuovoBtn = new JButton("Nuovo Utente");
-        JButton eliminaBtn = new JButton("Elimina Utente");
-        eliminaBtn.setForeground(Color.RED);
-
-        accediBtn.setFocusPainted(false);
-        nuovoBtn.setFocusPainted(false);
-        eliminaBtn.setFocusPainted(false);
-
-        accediBtn.addActionListener(e -> {
-            try {
-                String utente = selezionaUtenteEsistente(utenti.utentiRegistrati());
-                if (utente != null && !utente.isEmpty()) {
-                    utenteSelezionato.set(utente);
-                    dialog.dispose();
-                }
-            } catch (Exception ex) {
-                mostraErrore(ex.getMessage());
-            }
-        });
-
-        nuovoBtn.addActionListener(e -> {
-            try {
-                String utenteCreato = creaNuovoUtente();
-                boolean esito = utenti.creaNuovoUtente(utenteCreato);
-                if (esito) mostraMessaggio("Utente creato con successo!");
-                else mostraErrore("Errore: Salvataggio non effettuato");
-            } catch (Exception ex) {
-                mostraErrore(ex.getMessage());
-            }
-        });
-
-        eliminaBtn.addActionListener(e -> {
-            try { eliminaUtente(utenti); }
-            catch (Exception ex) { mostraErrore(ex.getMessage()); }
-        });
-
-        buttonPanel.add(accediBtn);
-        buttonPanel.add(nuovoBtn);
-        buttonPanel.add(eliminaBtn);
-
-        mainPanel.add(buttonPanel, BorderLayout.CENTER);
-        dialog.add(mainPanel);
-
-        dialog.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-        dialog.setVisible(true);
-        return utenteSelezionato.get();
-    }
-
-    public String selezionaUtenteEsistente(List<String> utenti) {
-        if (utenti == null || utenti.isEmpty())
-            throw new IllegalArgumentException("Nessun utente registrato");
-
-        String[] utentiValidi = utenti.stream()
-                .filter(u -> u != null && !u.trim().isEmpty())
-                .toArray(String[]::new);
-
-        if (utentiValidi.length == 0)
-            throw new IllegalArgumentException("Nessun utente valido");
-
-        String selezionato = (String) JOptionPane.showInputDialog(
-                this, "Seleziona un utente:", "Selezione Utente",
-                JOptionPane.QUESTION_MESSAGE, null, utentiValidi, utentiValidi[0]
-        );
-
-        if (selezionato == null)
-            throw new RuntimeException("Selezione annullata");
-        return selezionato;
-    }
-
-    public String creaNuovoUtente() {
-        String nome = JOptionPane.showInputDialog(
-                this, "Inserisci il nuovo Username:", "Creazione Nuovo Utente",
-                JOptionPane.QUESTION_MESSAGE
-        );
-
-        if (nome == null || nome.trim().isEmpty())
-            throw new RuntimeException("Operazione annullata");
-        return nome.trim();
-    }
-
-    public void eliminaUtente(UserManager utenti) {
-        String utente = selezionaUtenteEsistente(utenti.utentiRegistrati());
-        int conferma = JOptionPane.showConfirmDialog(
-                this,
-                "Sei sicuro di voler eliminare l'utente '" + utente + "' ?",
-                "Conferma eliminazione",
-                JOptionPane.OK_CANCEL_OPTION
-        );
-
-        if (conferma == JOptionPane.OK_OPTION) {
-            boolean esito = utenti.eliminaUtente(utente);
-            if (esito) {
-                mostraMessaggio("Utente eliminato con successo!");
-            } else {
-                mostraErrore("Errore: Utente non eliminato.");
-            }
-        }
-    }
 
 
     // LIBRERIA DELL'UTENTE
     public void homeGestioneLibri(){
         // Creazione del frame principale
-        JFrame frame = new JFrame("Catologo di " + libreriaHub.utenteCorrente());
+        JFrame frame = new JFrame("Catologo di " + hubLibreria.utenteCorrente());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
 
         // Preparazione della tabella
-        JTable tabella = creaTabellaLibri(libreriaHub.visualizzaLibri(),null);
+        JTable tabella = creaTabellaLibri(hubLibreria.visualizzaLibri(),null);
         JScrollPane scrollPane = new JScrollPane(tabella);
 
         // Preparazione dei pulsanti
         JPanel panelloPulsanti = creaPannelloPulsanti(
                 frame,
                 tabella,
-                libreriaHub.visualizzaLibri(),
-                libreriaHub.utenteCorrente()
+                hubLibreria.visualizzaLibri(),
+                hubLibreria.utenteCorrente()
         );
 
         // Configurazione del layout
@@ -243,7 +119,7 @@ public class CatalogoLibri extends JFrame {
         pulsanteOrdina.setFocusPainted(false);
         pulsanteOrdina.addActionListener(e -> {
             TipoOrdinamento tipo = selezionaOrdinamento(TipoOrdinamento.values());
-            visualizzaConOrdinamento(libreriaHub.visualizzaLibriOrdinati(tipo), tipo);
+            visualizzaConOrdinamento(hubLibreria.visualizzaLibriOrdinati(tipo), tipo);
         });
 
         // Pulsante Filtri
@@ -268,9 +144,9 @@ public class CatalogoLibri extends JFrame {
         pulsanteAggiungiLibro.addActionListener(e -> {
             Libro nuovoLibro = creaLibro(tabella, null);
             if (nuovoLibro != null) {
-                libreriaHub.aggiungiLibro(nuovoLibro);
+                hubLibreria.aggiungiLibro(nuovoLibro);
             }
-            aggiornaTabella(tabella, libreriaHub.visualizzaLibri(), null);
+            aggiornaTabella(tabella, hubLibreria.visualizzaLibri(), null);
         });
 
         // Pulsante Annulla ultima azione
@@ -279,8 +155,8 @@ public class CatalogoLibri extends JFrame {
         pulsanteAnnulla.setFocusPainted(false);
         pulsanteAnnulla.addActionListener(e -> {
             try {
-                libreriaHub.annullaAggiornamento();
-                aggiornaTabella(tabella, libreriaHub.visualizzaLibri(), null);
+                hubLibreria.annullaAggiornamento();
+                aggiornaTabella(tabella, hubLibreria.visualizzaLibri(), null);
                 mostraMessaggio("Ultima azione annullata con successo!");
             } catch (Exception ex) {
                 mostraErrore(ex.getMessage());
@@ -341,8 +217,8 @@ public class CatalogoLibri extends JFrame {
         btnModifica.addActionListener(e -> {
             SwingUtilities.getWindowAncestor(panel).dispose();
             Libro libroMoficato = creaLibro(tabella, libro);
-            libreriaHub.modificaLibro(libro,libroMoficato);
-            aggiornaTabella(tabella, libreriaHub.visualizzaLibri(), null);
+            hubLibreria.modificaLibro(libro,libroMoficato);
+            aggiornaTabella(tabella, hubLibreria.visualizzaLibri(), null);
         });
 
         btnElimina.addActionListener(e -> {
@@ -351,13 +227,13 @@ public class CatalogoLibri extends JFrame {
                     "Conferma", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                 SwingUtilities.getWindowAncestor(panel).dispose();
                 try {
-                    libreriaHub.rimuoviLibro(libro);
+                    hubLibreria.rimuoviLibro(libro);
                 } catch (Exception ex) {
                     mostraErrore(ex.getMessage());
                     return;
                 }
                 mostraMessaggio("Libro eliminato con successo!");
-                aggiornaTabella(tabella, libreriaHub.visualizzaLibri(), null);
+                aggiornaTabella(tabella, hubLibreria.visualizzaLibri(), null);
             }
         });
 
@@ -414,15 +290,11 @@ public class CatalogoLibri extends JFrame {
 
 
     // METODI COMUNI DI UTILITY
-    private void mostraErrore(String messaggio) {
-        JOptionPane.showMessageDialog(this, messaggio, "Errore", JOptionPane.ERROR_MESSAGE);
-    }
 
-    private void mostraMessaggio(String messaggio) {
-        JOptionPane.showMessageDialog(this, messaggio, "Informazione", JOptionPane.INFORMATION_MESSAGE);
-    }
 
-    private <T> String convertiGruppoInString(Collection<T> elementi) {
+
+
+    private <T> String convertiCollectionInString(Collection<T> elementi) {
         StringBuilder result = new StringBuilder();
         for (T elemento : elementi) {
             if (result.length() > 0) { result.append(", "); }
@@ -437,18 +309,14 @@ public class CatalogoLibri extends JFrame {
 
     private JTable creaTabellaLibri(List<Libro> libri, TipoOrdinamento tipoOrdinamento) {
 
-        String nomeColonna = "ISBN"; // Default
-        if (TipoOrdinamento.VALUTAZIONE.equals(tipoOrdinamento)) nomeColonna = "Valutazione";
-        else if (TipoOrdinamento.STATO_LETTURA.equals(tipoOrdinamento)) nomeColonna = "Stato lettura";
-
-        String[] colonne = {"Titolo", "Autori", "Genere", nomeColonna};
+        String[] colonne = {"Titolo", "Autori", "Genere", "ISBN"};
         Object[][] dati = new Object[libri.size()][4];
 
         for (int i = 0; i < libri.size(); i++) {
             Libro libro = libri.get(i);
             dati[i][0] = valoreOrPlaceholder(libro.getTitolo());
-            dati[i][1] = valoreOrPlaceholder(convertiGruppoInString(libro.getAutori()));
-            dati[i][2] = valoreOrPlaceholder(convertiGruppoInString(libro.getGeneri()));
+            dati[i][1] = valoreOrPlaceholder(convertiCollectionInString(libro.getAutori()));
+            dati[i][2] = valoreOrPlaceholder(convertiCollectionInString(libro.getGeneri()));
 
             // Quarta colonna in base alla scelta
             if (TipoOrdinamento.VALUTAZIONE.equals(tipoOrdinamento)) {
@@ -508,8 +376,8 @@ public class CatalogoLibri extends JFrame {
         for (Libro libro : libri) {
             Object[] riga = new Object[4];
             riga[0] = valoreOrPlaceholder(libro.getTitolo());
-            riga[1] = valoreOrPlaceholder(convertiGruppoInString(libro.getAutori()));
-            riga[2] = valoreOrPlaceholder(convertiGruppoInString(libro.getGeneri()));
+            riga[1] = valoreOrPlaceholder(convertiCollectionInString(libro.getAutori()));
+            riga[2] = valoreOrPlaceholder(convertiCollectionInString(libro.getGeneri()));
 
             if (TipoOrdinamento.VALUTAZIONE.equals(tipoOrdinamento)) {
                 riga[3] = valoreOrPlaceholder(String.valueOf(libro.getValutazione() != null ? libro.getValutazione().getStelle() + " stelle" : "--"));
@@ -617,6 +485,14 @@ public class CatalogoLibri extends JFrame {
             }
         }
         return null;
+    }
+
+    private void mostraMessaggio(String messaggio) {
+        JOptionPane.showMessageDialog(this, messaggio, "Informazione", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void mostraErrore(String messaggio) {
+        JOptionPane.showMessageDialog(this, messaggio, "Errore", JOptionPane.ERROR_MESSAGE);
     }
 
 

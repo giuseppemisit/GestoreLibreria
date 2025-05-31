@@ -1,6 +1,7 @@
-package esplora;
+package esplora.commands;
 
 import base.libro.Libro;
+import esplora.CommandEsplora;
 
 import java.util.ArrayList;
 import java.util.List;
