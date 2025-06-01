@@ -1,6 +1,7 @@
 package app;
 
 import app.pannelli.SelezioneUtente;
+import controllo.libreria.ConcreteHubLibreria;
 import controllo.utenti.ConcreteUserManager;
 import base.libreria.Libreria;
 import base.libreria.LibreriaJson;
@@ -8,9 +9,9 @@ import base.libro.ConcreteLibro;
 import base.libro.Libro;
 import base.utility.Autore;
 import base.utility.InfoExtra;
-import controllo.libreria.ConcreteLibreriaHub;
 import controllo.libreria.HubLibreria;
 import controllo.utenti.UserManager;
+import esplora.interroga.Parametri;
 import esplora.ordina.utility.TipoOrdinamento;
 
 import javax.swing.*;
@@ -22,8 +23,9 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CatalogoLibri extends JFrame {
 
+public class CatalogoLibri {}
+/**
     private UserManager utenti;
     private HubLibreria hubLibreria;
 
@@ -33,7 +35,7 @@ public class CatalogoLibri extends JFrame {
 
         if (username != null && !username.isEmpty()) {
             Libreria lib = new LibreriaJson(username);
-            hubLibreria = new ConcreteLibreriaHub(lib);
+            hubLibreria = new ConcreteHubLibreria(lib);
             homeGestioneLibri();
         } else { System.exit(0);}
     }
@@ -91,8 +93,8 @@ public class CatalogoLibri extends JFrame {
         pulsanteLogout.setForeground(Color.RED);
         pulsanteLogout.setFocusPainted(false);
         pulsanteLogout.addActionListener(e -> {
-            frame.dispose(); // Chiude la finestra corrente
-            this.main(new String[0]); // Riavvia l'applicazione
+            frame.dispose();
+            CatalogoApp.restart();
         });
 
         // Pulsante Dettagli
@@ -103,7 +105,7 @@ public class CatalogoLibri extends JFrame {
             int rigaSelezionata = tabella.getSelectedRow();
             if (rigaSelezionata != -1) {
                 Libro libroSelezionato = libri.get(rigaSelezionata);
-                mostraInfoLibro(libroSelezionato, tabella);
+                mostraInfoLibro(tabella, libroSelezionato);
             } else {
                 JOptionPane.showMessageDialog(
                         frame,
@@ -119,23 +121,23 @@ public class CatalogoLibri extends JFrame {
         pulsanteOrdina.setFocusPainted(false);
         pulsanteOrdina.addActionListener(e -> {
             TipoOrdinamento tipo = selezionaOrdinamento(TipoOrdinamento.values());
-            visualizzaConOrdinamento(hubLibreria.visualizzaLibriOrdinati(tipo), tipo);
+            hubLibreria.ordinaLibri(tipo);
         });
 
         // Pulsante Filtri
         JButton pulsanteFiltri = new JButton("Filtri");
         pulsanteFiltri.setFocusPainted(false);
         pulsanteFiltri.addActionListener(e -> {
-            //Parametri parametri = selezionaParametriFiltro();
-            //visualizzaRisultati(libreriaHub.filtraLibri(parametri));
+            Parametri parametri = selezionaParametriFiltro();
+            hubLibreria.filtraLibri(parametri);
         });
 
         // Pulsante Cerca
         JButton pulsanteCerca = new JButton("Cerca");
         pulsanteCerca.setFocusPainted(false);
         pulsanteCerca.addActionListener(e -> {
-            //Parametri parametri = selezionaParametriRicerca();
-            //visualizzaRisultati(libreriaHub.cercaLibri(parametri));
+            Parametri parametri = selezionaParametriRicerca();
+            hubLibreria.cercaLibri(parametri);
         });
 
         // Pulsante Aggiungi +
@@ -144,23 +146,33 @@ public class CatalogoLibri extends JFrame {
         pulsanteAggiungiLibro.addActionListener(e -> {
             Libro nuovoLibro = creaLibro(tabella, null);
             if (nuovoLibro != null) {
-                hubLibreria.aggiungiLibro(nuovoLibro);
+                hubLibreria.eseguiAggiuntaLibro(nuovoLibro);
             }
-            aggiornaTabella(tabella, hubLibreria.visualizzaLibri(), null);
+            mostraMessaggio("Libro aggiunto con successo!");
         });
 
-        // Pulsante Annulla ultima azione
-        JButton pulsanteAnnulla = new JButton("Annulla Ultima azione");
+        // Pulsante Annulla ultima modifica
+        JButton pulsanteAnnulla = new JButton("Annulla Modifica");
         pulsanteAnnulla.setForeground(new Color(0xFF8C00));
         pulsanteAnnulla.setFocusPainted(false);
         pulsanteAnnulla.addActionListener(e -> {
             try {
-                hubLibreria.annullaAggiornamento();
-                aggiornaTabella(tabella, hubLibreria.visualizzaLibri(), null);
-                mostraMessaggio("Ultima azione annullata con successo!");
+                hubLibreria.annullaUltimaGestione();
+                mostraMessaggio("Ultimo aggiornamento annullato con successo!");
             } catch (Exception ex) {
                 mostraErrore(ex.getMessage());
             }
+        });
+
+        // Pulsante Ripristina Vista
+        JButton pulsanteRipristinaVista = new JButton("Ripristina Vista");
+        pulsanteRipristinaVista.setForeground(new Color(0xFF8C00));
+        pulsanteRipristinaVista.setFocusPainted(false);
+        pulsanteRipristinaVista.addActionListener(e -> {
+            try {
+                hubLibreria.vistaLibreriaReset();
+            } catch (Exception ex){
+                mostraErrore(ex.getMessage());
         });
 
         // Aggiunta dei pulsanti al pannello, nell'ordine richiesto
@@ -171,12 +183,13 @@ public class CatalogoLibri extends JFrame {
         pannelloPulsanti.add(pulsanteCerca);
         pannelloPulsanti.add(pulsanteAggiungiLibro);
         pannelloPulsanti.add(pulsanteAnnulla);
+        pannelloPulsanti.add(pulsanteRipristinaVista);
 
         return pannelloPulsanti;
     }
 
 
-    public void mostraInfoLibro(Libro libro, JTable tabella) {
+    public void mostraInfoLibro(Component parent, Libro libro) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
@@ -216,7 +229,7 @@ public class CatalogoLibri extends JFrame {
 
         btnModifica.addActionListener(e -> {
             SwingUtilities.getWindowAncestor(panel).dispose();
-            Libro libroMoficato = creaLibro(tabella, libro);
+            Libro libroMoficato = creaLibro(parent, libro);
             hubLibreria.modificaLibro(libro,libroMoficato);
             aggiornaTabella(tabella, hubLibreria.visualizzaLibri(), null);
         });
@@ -497,4 +510,4 @@ public class CatalogoLibri extends JFrame {
 
 
 
-}
+}*/

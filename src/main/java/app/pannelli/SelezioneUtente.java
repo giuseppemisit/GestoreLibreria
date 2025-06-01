@@ -51,7 +51,7 @@ public class SelezioneUtente {
                     dialog.dispose();
                 }
             } catch (Exception ex) {
-                mostraErrore(dialog, ex.getMessage());
+                mostraWarning(dialog, ex.getMessage());
             }
         });
 
@@ -62,7 +62,7 @@ public class SelezioneUtente {
                 if (esito) mostraMessaggio(dialog, "Utente creato con successo!");
                 else mostraErrore(dialog, "Errore: Salvataggio non effettuato");
             } catch (Exception ex) {
-                mostraErrore(dialog, ex.getMessage());
+                mostraWarning(dialog, ex.getMessage());
             }
         });
 
@@ -71,7 +71,7 @@ public class SelezioneUtente {
                 eliminaUtente(dialog, utenti);
             }
             catch (Exception ex) {
-                mostraErrore(dialog, ex.getMessage());
+                mostraWarning(dialog, ex.getMessage());
             }
         });
 
@@ -103,14 +103,19 @@ public class SelezioneUtente {
         if (utentiValidi.length == 0)
             throw new IllegalArgumentException("Nessun utente valido");
 
+        String[] opzioni = new String[utentiValidi.length + 1];
+        opzioni[0] = "--";
+        System.arraycopy(utentiValidi, 0, opzioni, 1, utentiValidi.length);
+
         String selezionato = (String) JOptionPane.showInputDialog(
                 parent, "Seleziona un utente:", "Selezione Utente",
-                JOptionPane.QUESTION_MESSAGE, null, utentiValidi, utentiValidi[0]
+                JOptionPane.QUESTION_MESSAGE, null, opzioni, opzioni[0]
         );
 
         if (selezionato == null)
             throw new RuntimeException("Selezione annullata");
-        return selezionato;
+
+        return selezionato.equals("--") ? null : selezionato;
     }
 
     private String creaNuovoUtente(Component parent) {
@@ -126,25 +131,31 @@ public class SelezioneUtente {
 
     private void eliminaUtente(Component parent, UserManager utenti) {
         String utente = selezionaUtenteEsistente(parent, utenti.utentiRegistrati());
-        int conferma = JOptionPane.showConfirmDialog(
-                parent,
-                "Sei sicuro di voler eliminare l'utente '" + utente + "' ?",
-                "Conferma eliminazione",
-                JOptionPane.OK_CANCEL_OPTION
-        );
+        if (utente != null) {
+            int conferma = JOptionPane.showConfirmDialog(
+                    parent,
+                    "Sei sicuro di voler eliminare l'utente '" + utente + "' ?",
+                    "Conferma eliminazione",
+                    JOptionPane.OK_CANCEL_OPTION
+            );
 
-        if (conferma == JOptionPane.OK_OPTION) {
-            boolean esito = utenti.eliminaUtente(utente);
-            if (esito) {
-                mostraMessaggio(parent, "Utente eliminato con successo!");
-            } else {
-                mostraErrore(parent, "Errore: Utente non eliminato.");
+            if (conferma == JOptionPane.OK_OPTION) {
+                boolean esito = utenti.eliminaUtente(utente);
+                if (esito) {
+                    mostraMessaggio(parent, "Utente eliminato con successo!");
+                } else {
+                    mostraErrore(parent, "Errore: Utente non eliminato.");
+                }
             }
         }
     }
 
     private void mostraMessaggio(Component parent, String messaggio) {
         JOptionPane.showMessageDialog(parent, messaggio, "Informazione", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void mostraWarning(Component parent, String messaggio) {
+        JOptionPane.showMessageDialog(parent, messaggio, "Attenzione", JOptionPane.WARNING_MESSAGE);
     }
 
     private void mostraErrore(Component parent, String messaggio) {

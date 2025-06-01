@@ -8,7 +8,7 @@ public class Autore {
     public Autore(String nome, String cognome) {
         if(nome == null || nome.isBlank())
             throw new IllegalArgumentException("Inserire un nome");
-        if(cognome == null || cognome.isBlank())
+        if(cognome == null)
             throw new IllegalArgumentException("Inserire un cognome");
         this.nome = nome;
         this.cognome = cognome;

@@ -50,6 +50,7 @@ public class ConcreteHubLibreria extends AbstractHubLibreria {
     public void eseguiAggiuntaLibro(Libro libro) {
         comandoGestione = new AggiungiLibro(libreria, libro);
         comandoGestione.execute();
+        aggiornaLibreriaCorrente();
         notificaObserver();
     }
 
@@ -57,6 +58,7 @@ public class ConcreteHubLibreria extends AbstractHubLibreria {
     public void eseguiRimozioneLibro(Libro libro) {
         comandoGestione = new RimuoviLibro(libreria, libro);
         comandoGestione.execute();
+        aggiornaLibreriaCorrente();
         notificaObserver();
     }
 
@@ -64,37 +66,45 @@ public class ConcreteHubLibreria extends AbstractHubLibreria {
     public void eseguiModificaLibro(Libro originale, Libro modificato) {
         comandoGestione = new ModificaLibro(libreria, originale, modificato);
         comandoGestione.execute();
+        aggiornaLibreriaCorrente();
         notificaObserver();
     }
 
     @Override
     public void annullaUltimaGestione() {
         if(comandoGestione == null)
-            throw new IllegalStateException("Nessun comando da annullare");
+            throw new IllegalStateException("Nessun ultima modifica da annullare!");
         comandoGestione.undo();
         comandoGestione = null;
+        aggiornaLibreriaCorrente();
         notificaObserver();
     }
 
     @Override
     public void ordinaLibri(TipoOrdinamento tipoOrdinamento) {
         comandoEsplora = new CommandOrdina(libreriaCorrente, tipoOrdinamento);
-        comandoEsplora.execute();
+        libreriaCorrente = comandoEsplora.execute();
         notificaObserver();
     }
 
     @Override
     public void cercaLibri(Parametri parametri) {
-        comandoEsplora = new CommandInterroga(libreriaCorrente, parametri);
-        comandoEsplora.execute();
+        List<Libro> libreriaOriginale = new ArrayList<>(libreria.getLibriUtente());
+        comandoEsplora = new CommandInterroga(libreriaOriginale, parametri);
+        libreriaCorrente = comandoEsplora.execute();
         notificaObserver();
     }
 
     @Override
     public void filtraLibri(Parametri parametri) {
-        comandoEsplora = new CommandInterroga(libreriaCorrente, parametri);
-        comandoEsplora.execute();
+        List<Libro> libreriaOriginale = new ArrayList<>(libreria.getLibriUtente());
+        comandoEsplora = new CommandInterroga(libreriaOriginale, parametri);
+        libreriaCorrente = comandoEsplora.execute();
         notificaObserver();
+    }
+
+    private void aggiornaLibreriaCorrente() {
+        libreriaCorrente = new ArrayList<>(libreria.getLibriUtente());
     }
 
 }
