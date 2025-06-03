@@ -366,7 +366,7 @@ public class PaginaUtente implements Observer {
 
             try {
                 hubLibreria.eseguiRimozioneLibro(libro);
-                mostraMessaggio(parent, "Libro eliminato con successo!");
+                mostraMessaggio(tabella, "Libro eliminato con successo!");
             } catch (Exception ex) {
                 mostraErrore(parent, ex.getMessage());
             }
@@ -556,8 +556,12 @@ public class PaginaUtente implements Observer {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    risultato[0] = creaParametriRicerca(fields[0], fields[1], fields[2]);
-                    dialog.dispose();
+                    try {
+                        risultato[0] = creaParametriRicerca(fields[0], fields[1], fields[2]);
+                        dialog.dispose();
+                    } catch (Exception ex) {
+                        mostraWarning(dialog, ex.getMessage());
+                    }
                 }
             }
         };
@@ -573,10 +577,10 @@ public class PaginaUtente implements Observer {
 
     private Parametri creaParametriRicerca(JTextField titoloField, JTextField autoreField, JTextField isbnField) {
         String titolo = getTextOrNull(titoloField);
-        String nomeCompleto = autoreField.getText().trim();
+        String nomeCompleto = getTextOrNull(autoreField);
         String isbn = getTextOrNull(isbnField);
 
-        Autore autore = !nomeCompleto.isEmpty() ? creaAutore(nomeCompleto) : null;
+        Autore autore = (nomeCompleto != null) ? creaAutore(nomeCompleto) : null;
 
         return new ParametriRicerca(titolo, autore, isbn);
     }

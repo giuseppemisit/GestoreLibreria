@@ -14,7 +14,7 @@ public interface Libreria {
 
     /**
      * Restituisce i libri associati all'utente corrente.
-     * @return una lista contenente i libri dell'utente corrente  // Aggiornato commento
+     * @return una lista contenente i libri dell'utente corrente
      */
     List<Libro> getLibriUtente();
 
@@ -24,7 +24,6 @@ public interface Libreria {
      */
     boolean aggiungiLibro(Libro libro);
 
-
     /**
      * Rimuove il libro dalla libreria
      * @return true se è stato eliminato, false altrimenti
@@ -32,10 +31,11 @@ public interface Libreria {
     boolean rimuoviLibro(Libro libro);
 
     /**
-     * modifica un libro presente nella collezione
+     * Modifica un libro presente nella collezione
      * @param libroOriginale libro da modificare
      * @param libroModificato libro modificato
      * @return true se è stato modificato,
      */
     boolean modificaLibro(Libro libroOriginale, Libro libroModificato);
+
 }

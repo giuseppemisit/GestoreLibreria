@@ -47,5 +47,4 @@ public class CatalogoApp extends JFrame {
         });
     }
 
-
 }

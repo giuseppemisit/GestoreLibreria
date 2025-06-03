@@ -133,4 +133,24 @@ public class JsonStorageService implements StorageService {
         }
         return true; // Se il file non esiste, l'operazione è considerata riuscita
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) return false;
+        if(obj == this) return true;
+        if(!(obj instanceof JsonStorageService)) return false;
+
+        JsonStorageService s = (JsonStorageService) obj;
+        return s.percorsoUtenti.equals(this.percorsoUtenti) &&
+                s.percorsoLibreria.equals(this.percorsoLibreria);
+    }
+
+    @Override
+    public int hashCode(){
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + percorsoUtenti.hashCode();
+        result = prime * result + percorsoLibreria.hashCode();
+        return result;
+    }
 }
