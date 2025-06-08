@@ -5,6 +5,7 @@ import base.utility.Autore;
 import base.utility.InfoExtra;
 import controllo.utenti.ConcreteUserManager;
 import controllo.utenti.UserManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -56,6 +57,13 @@ class LibreriaJsonTest {
         libro1 = new ConcreteLibro("9788804123451", "I Promessi Sposi", new InfoExtra.Valutazione(5), InfoExtra.StatoLettura.LETTO, autori1, generi1);
         libro2 = new ConcreteLibro("9788804678902", "Il Barone Rampante", new InfoExtra.Valutazione(4), InfoExtra.StatoLettura.IN_LETTURA, autori2, generi2);
         libro3 = new ConcreteLibro("9788804111113", "Il Nome della Rosa", null, InfoExtra.StatoLettura.DA_LEGGERE, autori3, generi3);
+    }
+
+    @AfterEach
+    void tearDown() {
+        UserManager userManager = new ConcreteUserManager();
+        if (userManager.esisteUtente(utenteTest))
+            userManager.eliminaUtente(utenteTest);
     }
 
     @Test
